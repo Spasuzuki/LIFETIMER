@@ -1,0 +1,17 @@
+<svg width="1080" height="1920" viewBox="0 0 1080 1920" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1920" fill="black"/>
+  
+  <!-- Hourglass Icon -->
+  <g transform="translate(390, 700) scale(0.3)">
+    <path d="M312 256H712L680 320H344L312 256Z" fill="white"/>
+    <path d="M312 768H712L680 704H344L312 768Z" fill="white"/>
+    <path d="M344 320L512 512L680 320H344Z" fill="white" opacity="0.8"/>
+    <path d="M512 512L344 704H680L512 512Z" fill="white" opacity="0.3"/>
+    <path d="M312 256V320L512 544L712 320V256H312Z" stroke="white" stroke-width="40" stroke-linejoin="round"/>
+    <path d="M312 768V704L512 480L712 704V768H312Z" stroke="white" stroke-width="40" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Text -->
+  <text x="540" y="1100" text-anchor="middle" fill="white" style="font-family: sans-serif; font-weight: 900; font-size: 80px; letter-spacing: 0.1em; font-style: italic;">LIFE TIMER</text>
+  <text x="540" y="1160" text-anchor="middle" fill="#666" style="font-family: sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.5em;">MEMENTO MORI</text>
+</svg>
