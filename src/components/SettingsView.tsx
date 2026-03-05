@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserData, Language } from '../types';
 import { COUNTRIES } from '../constants';
 import { COUNTRY_CODES } from '../countryCodes';
-import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart } from 'lucide-react';
+import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart, Calendar, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LEGAL_CONTENT } from '../constants/legal';
 import { translations } from '../translations';
@@ -133,13 +133,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                   <>
                     <div className="space-y-1.5">
                       <label className="text-xs uppercase tracking-widest text-zinc-500 font-bold">{t.birthDate}</label>
-                      <input
-                        type="date"
-                        required
-                        value={formData.birthDate}
-                        onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                          <Calendar className="w-5 h-5" />
+                        </div>
+                        <input
+                          type="date"
+                          required
+                          value={formData.birthDate}
+                          onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-12 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-white/20 transition-all appearance-none"
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -237,15 +242,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                         >
                           <div className="space-y-2">
                             <label className="text-xs uppercase tracking-widest text-zinc-500 font-bold">{t.notificationTime}</label>
-                            <input
-                              type="time"
-                              value={formData.notifications.dailyTime}
-                              onChange={(e) => setFormData({
-                                ...formData,
-                                notifications: { ...formData.notifications!, dailyTime: e.target.value }
-                              })}
-                              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
-                            />
+                            <div className="relative">
+                              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                                <Clock className="w-5 h-5" />
+                              </div>
+                              <input
+                                type="time"
+                                value={formData.notifications.dailyTime}
+                                onChange={(e) => setFormData({
+                                  ...formData,
+                                  notifications: { ...formData.notifications!, dailyTime: e.target.value }
+                                })}
+                                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-12 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-white/20 transition-all appearance-none"
+                              />
+                            </div>
                           </div>
 
                           <div className="space-y-3">
