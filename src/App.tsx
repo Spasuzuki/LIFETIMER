@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { translations } from './translations';
 import { NotificationService } from './services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { differenceInYears, parseISO, isSameDay, addYears, addMonths, differenceInMonths, differenceInWeeks } from 'date-fns';
+import { differenceInYears, parseISO, isSameDay, addYears, addMonths, differenceInMonths, differenceInWeeks, differenceInDays } from 'date-fns';
 import { COUNTRIES, LIFE_EXPECTANCY } from './constants';
 
 const STORAGE_KEY = 'life-timer-user-data';
@@ -208,9 +208,9 @@ export default function App() {
               const dateAfterYears = addYears(now, years);
               const months = differenceInMonths(deathDate, dateAfterYears);
               const dateAfterMonths = addMonths(dateAfterYears, months);
-              const weeks = differenceInWeeks(deathDate, dateAfterMonths);
+              const days = differenceInDays(deathDate, dateAfterMonths);
               
-              return { years, months, weeks };
+              return { years, months, weeks: days };
             })()}
             onClose={() => setIsBirthdayOpen(false)}
           />

@@ -49,7 +49,7 @@ export const translations: Record<Language, any> = {
     birth: '誕生',
     lifeSpan: '寿命',
     yearLabel: '年',
-    monthLabel: '月',
+    monthLabel: 'ヶ月',
     weekLabel: '週',
     notifications: '今年の進捗について',
     notificationsTab: '通知',
@@ -73,7 +73,7 @@ export const translations: Record<Language, any> = {
     sent: '送信完了！',
     permissionDenied: '権限が拒否されました',
     failedToSend: '送信に失敗しました',
-    monthStartedMsg: '{month}月が始まりました。',
+    monthStartedMsg: '{month}が始まりました。',
     goalProgressMsg: '今年の目標の進捗は{progress}%です。',
     keepItUp: 'この調子で頑張りましょう！',
     goal100Msg: 'すべての目標を達成しました！'
@@ -219,7 +219,11 @@ export const translations: Record<Language, any> = {
     happyBirthdayMsg: '✨ 愿这一天标志着你人生故事中辉煌新篇章的开始。珍惜每一秒，享受最伟大的冒险！ ✨',
     birthdayStart: '{age}岁开始',
     untilRemainingLife: '直到剩余寿命',
-    previewBirthday: '预览生日动画'
+    previewBirthday: '预览生日动画',
+    monthStartedMsg: '{month}开始了。',
+    goalProgressMsg: '今年的目标进度为{progress}%。',
+    keepItUp: '继续加油！',
+    goal100Msg: '你已完成所有目标！'
   },
   es: {
     title: 'TEMPORIZADOR DE VIDA',
@@ -287,7 +291,11 @@ export const translations: Record<Language, any> = {
     happyBirthdayMsg: '✨ Que este día marque el comienzo de un nuevo y brillante capítulo en la historia de tu vida. ¡Valora cada segundo y disfruta de la mayor aventura! ✨',
     birthdayStart: 'Empezar Edad {age}',
     untilRemainingLife: 'Hasta Vida Restante',
-    previewBirthday: 'Vista Previa de Animación'
+    previewBirthday: 'Vista Previa de Animación',
+    monthStartedMsg: 'Ha comenzado {month}.',
+    goalProgressMsg: 'El progreso de tus objetivos es del {progress}%.',
+    keepItUp: '¡Sigamos así!',
+    goal100Msg: '¡Has alcanzado todos tus objetivos!'
   },
   fr: {
     title: 'CHRONOMÈTRE DE VIE',
@@ -355,6 +363,10 @@ export const translations: Record<Language, any> = {
     happyBirthdayMsg: '✨ Que ce jour marque le début d\'un nouveau chapitre brillant dans l\'histoire de votre vie. Chérissez chaque seconde et profitez de la plus grande aventure ! ✨',
     birthdayStart: 'Démarrer Âge {age}',
     untilRemainingLife: 'Jusqu\'à la Vie Restante',
-    previewBirthday: 'Aperçu de l\'Animation'
+    previewBirthday: 'Aperçu de l\'Animation',
+    monthStartedMsg: '{month} a commencé.',
+    goalProgressMsg: 'La progression de vos objectifs est de {progress}%.',
+    keepItUp: 'Continuons comme ça !',
+    goal100Msg: 'Vous avez atteint tous vos objectifs !'
   }
 };

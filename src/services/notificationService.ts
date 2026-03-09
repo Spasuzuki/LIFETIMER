@@ -2,7 +2,7 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 import { UserData, NotificationSettings } from '../types';
 import { translations } from '../translations';
 import { LIFE_EXPECTANCY } from '../constants';
-import { differenceInYears, addYears, startOfMonth, addMonths, isSameDay, parseISO, differenceInMonths, differenceInWeeks } from 'date-fns';
+import { differenceInYears, addYears, startOfMonth, addMonths, isSameDay, parseISO, differenceInMonths, differenceInWeeks, differenceInDays } from 'date-fns';
 
 export class NotificationService {
   static async requestPermissions() {
@@ -104,9 +104,9 @@ export class NotificationService {
       const dateAfterYears = addYears(now, years);
       const months = differenceInMonths(deathDate, dateAfterYears);
       const dateAfterMonths = addMonths(dateAfterYears, months);
-      const weeks = differenceInWeeks(deathDate, dateAfterMonths);
+      const days = differenceInDays(deathDate, dateAfterMonths);
       
-      const body = `${t.remainingTime}: ${years}${t.yearLabel} ${months}${t.monthLabel} ${weeks}${t.weekLabel}`;
+      const body = `${years}${t.yearLabel} ${months}${t.monthLabel} ${days}${t.weekLabel}`;
       const time = getScheduledTime(1);
 
       notifications.push({
@@ -130,11 +130,12 @@ export class NotificationService {
       const completedCount = annualGoals.filter(i => i.completed).length;
       const progress = annualGoals.length > 0 ? Math.round((completedCount / annualGoals.length) * 100) : 0;
 
-      const monthStartedMsg = t.monthStartedMsg || '{month}月が始まりました。';
+      const monthStartedMsg = t.monthStartedMsg || '{month}が始まりました。';
       const goalProgressMsg = t.goalProgressMsg || '今年の目標の進捗は{progress}%です。';
       const keepItUp = t.keepItUp || "この調子で頑張りましょう！";
 
-      let body = monthStartedMsg.replace('{month}', (new Date().getMonth() + 1).toString()) + ' ';
+      const monthName = new Date().toLocaleString(userData.language || 'ja', { month: 'long' });
+      let body = monthStartedMsg.replace('{month}', monthName) + ' ';
       if (progress === 100) {
         body += t.goal100Msg || 'すべての目標を達成しました！';
       } else {

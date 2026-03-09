@@ -280,14 +280,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                       </div>
                     </div>
 
-                    {formData.notifications?.enabled && (browserPermission === 'denied' || browserPermission === 'default' || browserPermission === 'unsupported') && (
-                      <div className="p-3 border rounded-xl text-[10px] leading-relaxed space-y-2 bg-zinc-800/50 border-zinc-700 text-zinc-400">
-                        <div className="flex items-start gap-2">
-                          <span>ℹ️</span> <span>{t.permissionPromptMsg || 'Please allow notifications in your browser when prompted to receive alerts.'}</span>
-                        </div>
-                      </div>
-                    )}
-
                     <AnimatePresence>
                       {formData.notifications?.enabled && (
                         <motion.div
