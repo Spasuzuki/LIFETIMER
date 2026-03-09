@@ -143,7 +143,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                   }`}
                 >
                   <Bell className="w-4 h-4" />
-                  {t.notifications}
+                  {t.notificationsTab}
                 </button>
               </div>
 
@@ -281,41 +281,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                     </div>
 
                     {formData.notifications?.enabled && (browserPermission === 'denied' || browserPermission === 'default' || browserPermission === 'unsupported') && (
-                      <div className={`p-3 border rounded-xl text-[10px] leading-relaxed space-y-2 ${
-                        browserPermission === 'denied' || browserPermission === 'unsupported' ? 'bg-red-900/10 border-red-500/20 text-red-400' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'
-                      }`}>
+                      <div className="p-3 border rounded-xl text-[10px] leading-relaxed space-y-2 bg-zinc-800/50 border-zinc-700 text-zinc-400">
                         <div className="flex items-start gap-2">
-                          {browserPermission === 'denied' ? (
-                            <><span>⚠️</span> <span>{t.permissionDeniedMsg || 'Browser notifications are blocked. Please allow them in your browser settings to receive alerts.'}</span></>
-                          ) : browserPermission === 'unsupported' ? (
-                            <><span>⚠️</span> <span>{t.notificationsUnsupportedMsg || 'Notifications are not supported in this browser.'}</span></>
-                          ) : (
-                            <><span>ℹ️</span> <span>{t.permissionPromptMsg || 'Please allow notifications in your browser when prompted to receive alerts.'}</span></>
-                          )}
+                          <span>ℹ️</span> <span>{t.permissionPromptMsg || 'Please allow notifications in your browser when prompted to receive alerts.'}</span>
                         </div>
-                        
-                        {isIframe && (
-                          <div className="pt-2 border-t border-white/5 space-y-2">
-                            <p className="opacity-80">
-                              {t.iframeNotice || 'In the preview environment, browser security may block notifications. Please try opening the app in a new tab.'}
-                            </p>
-                            <button
-                              onClick={() => window.open(window.location.href, '_blank')}
-                              className="flex items-center gap-1.5 px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-[9px] font-bold transition-colors"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              {t.openInNewTab || 'Open in New Tab'}
-                            </button>
-                          </div>
-                        )}
-
-                        {isIOS && !isStandalone && (
-                          <div className="pt-2 border-t border-white/5 space-y-2">
-                            <p className="text-amber-400 opacity-90">
-                              {t.iosPwaNotice || 'On iOS, notifications require the app to be added to your Home Screen. Tap the Share button and select "Add to Home Screen".'}
-                            </p>
-                          </div>
-                        )}
                       </div>
                     )}
 
@@ -374,39 +343,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                               </div>
                             ))}
                           </div>
-
-                          <button
-                            type="button"
-                            disabled={testStatus !== 'idle'}
-                            onClick={async () => {
-                              setTestStatus('sending');
-                              const result = await NotificationService.sendTestNotification(t);
-                              setTestStatus(result as any);
-                              // Update browser permission state in case it changed
-                              if ('Notification' in window) {
-                                setBrowserPermission(Notification.permission);
-                              }
-                              setTimeout(() => setTestStatus('idle'), 3000);
-                            }}
-                            className={`w-full py-3 border rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 mt-4 ${
-                              testStatus === 'success' ? 'bg-emerald-900/20 border-emerald-500/50 text-emerald-400' :
-                              testStatus === 'error' || testStatus === 'denied' ? 'bg-red-900/20 border-red-500/50 text-red-400' :
-                              'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'
-                            }`}
-                          >
-                            {testStatus === 'sending' ? (
-                              <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
-                            ) : testStatus === 'success' ? (
-                              <Heart className="w-4 h-4" />
-                            ) : (
-                              <Send className="w-4 h-4" />
-                            )}
-                            {testStatus === 'sending' ? t.sending : 
-                             testStatus === 'success' ? t.sent : 
-                             testStatus === 'denied' ? t.permissionDenied :
-                             testStatus === 'error' ? t.failedToSend :
-                             t.sendTestNotification}
-                          </button>
                         </motion.div>
                       )}
                     </AnimatePresence>

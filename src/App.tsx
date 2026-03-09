@@ -14,7 +14,8 @@ import { CustomHourglass } from './components/CustomHourglass';
 import { AnimatePresence, motion } from 'motion/react';
 import { translations } from './translations';
 import { NotificationService } from './services/notificationService';
-import { differenceInYears, parseISO, isSameDay, addYears, differenceInMonths, differenceInWeeks } from 'date-fns';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { differenceInYears, parseISO, isSameDay, addYears, addMonths, differenceInMonths, differenceInWeeks } from 'date-fns';
 import { COUNTRIES, LIFE_EXPECTANCY } from './constants';
 
 const STORAGE_KEY = 'life-timer-user-data';
@@ -36,7 +37,20 @@ export default function App() {
 
   useEffect(() => {
     const timer = setInterval(() => setSeconds(new Date().getSeconds()), 1000);
-    return () => clearInterval(timer);
+    
+    const handleNotificationAction = (action: any) => {
+      console.log('Notification action performed:', action);
+      if (action.notification.id === 3) {
+        setIsBirthdayOpen(true);
+      }
+    };
+
+    LocalNotifications.addListener('localNotificationActionPerformed', handleNotificationAction);
+
+    return () => {
+      clearInterval(timer);
+      LocalNotifications.removeAllListeners();
+    };
   }, []);
 
   useEffect(() => {
@@ -191,8 +205,10 @@ export default function App() {
               const now = new Date();
               
               const years = differenceInYears(deathDate, now);
-              const months = differenceInMonths(deathDate, now) % 12;
-              const weeks = differenceInWeeks(deathDate, now) % 4; // Simplified
+              const dateAfterYears = addYears(now, years);
+              const months = differenceInMonths(deathDate, dateAfterYears);
+              const dateAfterMonths = addMonths(dateAfterYears, months);
+              const weeks = differenceInWeeks(deathDate, dateAfterMonths);
               
               return { years, months, weeks };
             })()}

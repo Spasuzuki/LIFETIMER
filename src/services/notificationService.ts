@@ -57,11 +57,40 @@ export class NotificationService {
     await LocalNotifications.cancel({ notifications: [{ id: 1 }, { id: 2 }, { id: 3 }] });
 
     const notifications = [];
-
-    // 1. Daily Quote Notification
     const [hours, minutes] = settings.dailyTime.split(':').map(Number);
-    
-    let dailyBody = 'Open the app to see today\'s quote.';
+
+    // Helper to add minutes to the base time
+    const getScheduledTime = (extraMinutes: number) => {
+      let h = hours;
+      let m = minutes + extraMinutes;
+      if (m >= 60) {
+        h = (h + Math.floor(m / 60)) % 24;
+        m = m % 60;
+      }
+      return { hour: h, minute: m };
+    };
+
+    // 1. Birthday Notification (Priority 1 - at dailyTime)
+    if (settings.birthdayMessage) {
+      const birthDate = parseISO(userData.birthDate);
+      const time = getScheduledTime(0);
+      notifications.push({
+        id: 3,
+        title: t.birthdayTitle,
+        body: t.happyBirthdayMsg,
+        schedule: {
+          allowWhileIdle: true,
+          on: {
+            month: birthDate.getMonth() + 1,
+            day: birthDate.getDate(),
+            hour: time.hour,
+            minute: time.minute
+          }
+        }
+      });
+    }
+
+    // 2. Remaining Life Notification (Priority 2 - at dailyTime + 1 min)
     if (settings.includeLifeRemaining) {
       const birthDate = parseISO(userData.birthDate);
       const expectancyYears = userData.lifeExpectancyOverride || 
@@ -72,41 +101,47 @@ export class NotificationService {
       const now = new Date();
       
       const years = differenceInYears(deathDate, now);
-      const months = differenceInMonths(deathDate, now) % 12;
-      const weeks = differenceInWeeks(deathDate, now) % 4;
+      const dateAfterYears = addYears(now, years);
+      const months = differenceInMonths(deathDate, dateAfterYears);
+      const dateAfterMonths = addMonths(dateAfterYears, months);
+      const weeks = differenceInWeeks(deathDate, dateAfterMonths);
       
-      dailyBody = `${t.remainingTime}: ${years}${t.yearLabel} ${months}${t.monthLabel} ${weeks}${t.weekLabel}`;
+      const body = `${t.remainingTime}: ${years}${t.yearLabel} ${months}${t.monthLabel} ${weeks}${t.weekLabel}`;
+      const time = getScheduledTime(1);
+
+      notifications.push({
+        id: 1,
+        title: t.remainingLife,
+        body: body,
+        schedule: {
+          allowWhileIdle: true,
+          on: {
+            hour: time.hour,
+            minute: time.minute
+          }
+        }
+      });
     }
 
-    notifications.push({
-      id: 1,
-      title: t.quote,
-      body: dailyBody,
-      schedule: {
-        allowWhileIdle: true,
-        on: {
-          hour: hours,
-          minute: minutes
-        }
-      }
-    });
-
-    // 2. Monthly Update Notification
+    // 3. Monthly Update Notification (Priority 3 - at dailyTime + 2 min, 1st of month)
     if (settings.monthlyUpdate) {
+      // Filter for annual goals only
       const annualGoals = userData.bucketList?.filter(i => i.category === 'annual') || [];
       const completedCount = annualGoals.filter(i => i.completed).length;
       const progress = annualGoals.length > 0 ? Math.round((completedCount / annualGoals.length) * 100) : 0;
 
-      const monthStartedMsg = t.monthStartedMsg || '{month} has started.';
-      const goalProgressMsg = t.goalProgressMsg || 'Your goal progress is {progress}%.';
-      const keepItUp = t.keepItUp || "Let's do our best!";
+      const monthStartedMsg = t.monthStartedMsg || '{month}月が始まりました。';
+      const goalProgressMsg = t.goalProgressMsg || '今年の目標の進捗は{progress}%です。';
+      const keepItUp = t.keepItUp || "この調子で頑張りましょう！";
 
       let body = monthStartedMsg.replace('{month}', (new Date().getMonth() + 1).toString()) + ' ';
       if (progress === 100) {
-        body += t.goal100Msg || 'You achieved all goals!';
+        body += t.goal100Msg || 'すべての目標を達成しました！';
       } else {
         body += goalProgressMsg.replace('{progress}', progress.toString()) + ' ' + keepItUp;
       }
+
+      const time = getScheduledTime(2);
 
       notifications.push({
         id: 2,
@@ -116,33 +151,16 @@ export class NotificationService {
           allowWhileIdle: true,
           on: {
             day: 1,
-            hour: 9,
-            minute: 0
+            hour: time.hour,
+            minute: time.minute
           }
         }
       });
     }
 
-    // 3. Birthday Notification
-    if (settings.birthdayMessage) {
-      const birthDate = parseISO(userData.birthDate);
-      notifications.push({
-        id: 3,
-        title: t.birthdayTitle,
-        body: t.happyBirthdayMsg,
-        schedule: {
-          allowWhileIdle: true,
-          on: {
-            month: birthDate.getMonth() + 1,
-            day: birthDate.getDate(),
-            hour: 0,
-            minute: 0
-          }
-        }
-      });
+    if (notifications.length > 0) {
+      await LocalNotifications.schedule({ notifications });
     }
-
-    await LocalNotifications.schedule({ notifications });
   }
 
   static async sendTestNotification(t: any) {
