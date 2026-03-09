@@ -67,7 +67,19 @@ export const translations: Record<Language, any> = {
     happyBirthdayMsg: '✨ 今日という日が、あなたの人生という物語の輝かしい新章の幕開けとなりますように。一分一秒を大切に、最高の冒険を楽しみましょう！ ✨',
     birthdayStart: '{age}歳スタート',
     untilRemainingLife: '残り寿命まで',
-    previewBirthday: '誕生日演出をプレビュー'
+    previewBirthday: '誕生日演出をプレビュー',
+    sendTestNotification: 'テスト通知を送信',
+    testNotificationMsg: 'これはテスト通知です！正常に動作しています ✨',
+    sending: '送信中...',
+    sent: '送信完了！',
+    permissionDenied: '権限が拒否されました',
+    failedToSend: '送信に失敗しました',
+    permissionDeniedMsg: 'ブラウザの通知がブロックされています。通知を受け取るには、ブラウザの設定で許可してください。',
+    permissionPromptMsg: '通知を受け取るには、ブラウザの確認ダイアログで「許可」を選択してください。',
+    notificationsUnsupportedMsg: 'このブラウザは通知機能をサポートしていません。',
+    iframeNotice: 'プレビュー環境（iframe）ではブラウザの制限により通知がブロックされる場合があります。新しいタブで開いて設定をお試しください。',
+    openInNewTab: '新しいタブで開いて設定する',
+    iosPwaNotice: 'iOSでは、通知を受け取るためにアプリをホーム画面に追加する必要があります。共有ボタンから「ホーム画面に追加」を選択してください。'
   },
   en: {
     title: 'LIFE TIMER',
@@ -133,7 +145,19 @@ export const translations: Record<Language, any> = {
     happyBirthdayMsg: '✨ May this day mark the beginning of a brilliant new chapter in your life story. Cherish every second and enjoy the greatest adventure! ✨',
     birthdayStart: 'Start Age {age}',
     untilRemainingLife: 'Until Remaining Life',
-    previewBirthday: 'Preview Birthday Animation'
+    previewBirthday: 'Preview Birthday Animation',
+    sendTestNotification: 'Send Test Notification',
+    testNotificationMsg: 'This is a test notification! It works! ✨',
+    sending: 'Sending...',
+    sent: 'Sent!',
+    permissionDenied: 'Permission Denied',
+    failedToSend: 'Failed to Send',
+    permissionDeniedMsg: 'Browser notifications are blocked. Please allow them in your browser settings to receive alerts.',
+    permissionPromptMsg: 'Please allow notifications in your browser when prompted to receive alerts.',
+    notificationsUnsupportedMsg: 'Notifications are not supported in this browser.',
+    iframeNotice: 'In the preview environment, browser security may block notifications. Please try opening the app in a new tab.',
+    openInNewTab: 'Open in New Tab',
+    iosPwaNotice: 'On iOS, notifications require the app to be added to your Home Screen. Tap the Share button and select "Add to Home Screen".'
   },
   zh: {
     title: '人生倒计时',

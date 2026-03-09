@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { UserData, Language } from '../types';
 import { COUNTRIES } from '../constants';
 import { COUNTRY_CODES } from '../countryCodes';
-import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart, Calendar, Clock } from 'lucide-react';
+import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart, Calendar, Clock, Send, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LEGAL_CONTENT } from '../constants/legal';
 import { translations } from '../translations';
+import { NotificationService } from '../services/notificationService';
 
 // Helper to convert ISO country code to emoji flag
 const getFlagEmoji = (countryName: string) => {
@@ -46,6 +47,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
   });
   const [activeTab, setActiveTab] = useState<'general' | 'notifications'>('general');
   const [legalView, setLegalView] = useState<'privacy' | 'terms' | null>(null);
+  const [testStatus, setTestStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'denied'>('idle');
+  const [browserPermission, setBrowserPermission] = useState<NotificationPermission | 'unsupported'>('default');
+  const [isIframe, setIsIframe] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  React.useEffect(() => {
+    setIsIframe(window.self !== window.top);
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOS(isIOSDevice);
+    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone);
+    
+    if (!('Notification' in window)) {
+      setBrowserPermission('unsupported');
+    } else {
+      setBrowserPermission(Notification.permission);
+    }
+  }, []);
 
   const t = translations[formData.language || 'ja'];
 
@@ -211,16 +230,46 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                   </>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-xl border border-zinc-800">
+                    <div 
+                      className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-xl border border-zinc-800 cursor-pointer hover:bg-zinc-800 transition-colors"
+                      onClick={async () => {
+                        const currentEnabled = formData.notifications?.enabled;
+                        const newEnabled = !currentEnabled;
+                        
+                        // Update UI immediately for better responsiveness
+                        setFormData(prev => ({
+                          ...prev,
+                          notifications: {
+                            ...(prev.notifications || {
+                              dailyTime: '09:00',
+                              includeLifeRemaining: true,
+                              monthlyUpdate: true,
+                              birthdayMessage: true
+                            }),
+                            enabled: newEnabled
+                          }
+                        }));
+
+                        if (newEnabled) {
+                          try {
+                            const granted = await NotificationService.requestPermissions();
+                            if (!granted) {
+                              console.warn('Notification permission was not granted');
+                            }
+                            // Re-check browser permission state
+                            if ('Notification' in window) {
+                              setBrowserPermission(Notification.permission);
+                            }
+                          } catch (err) {
+                            console.error('Error requesting permissions:', err);
+                          }
+                        }
+                      }}
+                    >
                       <div className="space-y-0.5">
                         <div className="text-sm font-bold text-white">{t.enableNotifications}</div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({
-                          ...formData,
-                          notifications: { ...formData.notifications!, enabled: !formData.notifications?.enabled }
-                        })}
+                      <div
                         className={`w-12 h-6 rounded-full transition-all relative ${
                           formData.notifications?.enabled ? 'bg-white' : 'bg-zinc-700'
                         }`}
@@ -228,8 +277,47 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                         <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${
                           formData.notifications?.enabled ? 'right-1 bg-black' : 'left-1 bg-zinc-400'
                         }`} />
-                      </button>
+                      </div>
                     </div>
+
+                    {formData.notifications?.enabled && (browserPermission === 'denied' || browserPermission === 'default' || browserPermission === 'unsupported') && (
+                      <div className={`p-3 border rounded-xl text-[10px] leading-relaxed space-y-2 ${
+                        browserPermission === 'denied' || browserPermission === 'unsupported' ? 'bg-red-900/10 border-red-500/20 text-red-400' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'
+                      }`}>
+                        <div className="flex items-start gap-2">
+                          {browserPermission === 'denied' ? (
+                            <><span>⚠️</span> <span>{t.permissionDeniedMsg || 'Browser notifications are blocked. Please allow them in your browser settings to receive alerts.'}</span></>
+                          ) : browserPermission === 'unsupported' ? (
+                            <><span>⚠️</span> <span>{t.notificationsUnsupportedMsg || 'Notifications are not supported in this browser.'}</span></>
+                          ) : (
+                            <><span>ℹ️</span> <span>{t.permissionPromptMsg || 'Please allow notifications in your browser when prompted to receive alerts.'}</span></>
+                          )}
+                        </div>
+                        
+                        {isIframe && (
+                          <div className="pt-2 border-t border-white/5 space-y-2">
+                            <p className="opacity-80">
+                              {t.iframeNotice || 'In the preview environment, browser security may block notifications. Please try opening the app in a new tab.'}
+                            </p>
+                            <button
+                              onClick={() => window.open(window.location.href, '_blank')}
+                              className="flex items-center gap-1.5 px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-[9px] font-bold transition-colors"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              {t.openInNewTab || 'Open in New Tab'}
+                            </button>
+                          </div>
+                        )}
+
+                        {isIOS && !isStandalone && (
+                          <div className="pt-2 border-t border-white/5 space-y-2">
+                            <p className="text-amber-400 opacity-90">
+                              {t.iosPwaNotice || 'On iOS, notifications require the app to be added to your Home Screen. Tap the Share button and select "Add to Home Screen".'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <AnimatePresence>
                       {formData.notifications?.enabled && (
@@ -286,6 +374,39 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                               </div>
                             ))}
                           </div>
+
+                          <button
+                            type="button"
+                            disabled={testStatus !== 'idle'}
+                            onClick={async () => {
+                              setTestStatus('sending');
+                              const result = await NotificationService.sendTestNotification(t);
+                              setTestStatus(result as any);
+                              // Update browser permission state in case it changed
+                              if ('Notification' in window) {
+                                setBrowserPermission(Notification.permission);
+                              }
+                              setTimeout(() => setTestStatus('idle'), 3000);
+                            }}
+                            className={`w-full py-3 border rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 mt-4 ${
+                              testStatus === 'success' ? 'bg-emerald-900/20 border-emerald-500/50 text-emerald-400' :
+                              testStatus === 'error' || testStatus === 'denied' ? 'bg-red-900/20 border-red-500/50 text-red-400' :
+                              'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'
+                            }`}
+                          >
+                            {testStatus === 'sending' ? (
+                              <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+                            ) : testStatus === 'success' ? (
+                              <Heart className="w-4 h-4" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
+                            {testStatus === 'sending' ? t.sending : 
+                             testStatus === 'success' ? t.sent : 
+                             testStatus === 'denied' ? t.permissionDenied :
+                             testStatus === 'error' ? t.failedToSend :
+                             t.sendTestNotification}
+                          </button>
                         </motion.div>
                       )}
                     </AnimatePresence>

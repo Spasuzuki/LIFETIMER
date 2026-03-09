@@ -6,8 +6,39 @@ import { differenceInYears, addYears, startOfMonth, addMonths, isSameDay, parseI
 
 export class NotificationService {
   static async requestPermissions() {
-    const status = await LocalNotifications.requestPermissions();
-    return status.display === 'granted';
+    try {
+      // First check native browser permission if available
+      if ('Notification' in window) {
+        console.log('Native browser Notification.permission:', Notification.permission);
+        if (Notification.permission === 'granted') return true;
+        if (Notification.permission === 'denied') {
+          console.warn('Native browser notification permission is denied');
+          // We still try Capacitor just in case, but usually this is final
+        }
+      }
+
+      const check = await LocalNotifications.checkPermissions();
+      if (check.display === 'granted') return true;
+      
+      const status = await LocalNotifications.requestPermissions();
+      if (status.display === 'granted') return true;
+
+      // Final fallback: try native request if Capacitor failed or returned non-granted
+      if ('Notification' in window && Notification.permission !== 'denied') {
+        const nativeStatus = await Notification.requestPermission();
+        return nativeStatus === 'granted';
+      }
+
+      return false;
+    } catch (e) {
+      console.error('Failed to request notification permissions:', e);
+      
+      // Last ditch effort for web
+      if ('Notification' in window) {
+        return Notification.permission === 'granted';
+      }
+      return false;
+    }
   }
 
   static async scheduleNotifications(userData: UserData) {
@@ -15,6 +46,9 @@ export class NotificationService {
       await LocalNotifications.cancel({ notifications: [{ id: 1 }, { id: 2 }, { id: 3 }] });
       return;
     }
+
+    const granted = await this.requestPermissions();
+    if (!granted) return;
 
     const settings = userData.notifications;
     const t = translations[userData.language || 'ja'];
@@ -109,5 +143,66 @@ export class NotificationService {
     }
 
     await LocalNotifications.schedule({ notifications });
+  }
+
+  static async sendTestNotification(t: any) {
+    console.log('Attempting to send test notification...');
+    
+    // Log native status for debugging
+    if ('Notification' in window) {
+      console.log('Current native Notification.permission:', Notification.permission);
+    }
+
+    const granted = await this.requestPermissions();
+    console.log('Permission status after request:', granted);
+    
+    if (!granted) {
+      console.warn('Notification permission not granted');
+      return 'denied';
+    }
+
+    // On web, native Notification API is often the most reliable for immediate feedback
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        const n = new Notification('LIFE TIMER', {
+          body: t.testNotificationMsg || 'This is a test notification! It works! ✨',
+          tag: 'life-timer-test'
+        });
+        
+        n.onclick = () => {
+          window.focus();
+          n.close();
+        };
+        
+        console.log('Native test notification sent successfully');
+        // We still try Capacitor as well to ensure it's also working
+      } catch (e) {
+        console.error('Native Notification API failed', e);
+      }
+    }
+
+    try {
+      // Try scheduling 1 second in the future, which is sometimes more reliable than immediate
+      const result = await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: Math.floor(Math.random() * 10000),
+            title: 'LIFE TIMER',
+            body: t.testNotificationMsg || 'This is a test notification! It works! ✨',
+            schedule: { at: new Date(Date.now() + 1000) } 
+          }
+        ]
+      });
+      console.log('Capacitor notification scheduled successfully:', result);
+      return 'success';
+    } catch (e) {
+      console.error('Failed to schedule Capacitor notification:', e);
+      
+      // If we already sent a native one, we can still return success
+      if ('Notification' in window && Notification.permission === 'granted') {
+        return 'success';
+      }
+      return 'error';
+    }
   }
 }
