@@ -189,7 +189,7 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
                     </div>
                   )}
                 </div>
-                <div className="shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <div className="shrink-0 flex items-center gap-1 transition-all">
                   {item.completed && (
                     <button 
                       onClick={() => toggleItem(item.id)}
