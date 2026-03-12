@@ -2,7 +2,20 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 import { UserData, NotificationSettings } from '../types';
 import { translations } from '../translations';
 import { LIFE_EXPECTANCY } from '../constants';
-import { differenceInYears, addYears, startOfMonth, addMonths, isSameDay, parseISO, differenceInMonths, differenceInWeeks, differenceInDays } from 'date-fns';
+import { QUOTES } from '../constants/quotes';
+import { 
+  differenceInYears, 
+  addYears, 
+  startOfMonth, 
+  addMonths, 
+  isSameDay, 
+  parseISO, 
+  differenceInMonths, 
+  differenceInWeeks, 
+  differenceInDays,
+  startOfYear,
+  addDays
+} from 'date-fns';
 
 export class NotificationService {
   static async requestPermissions() {
@@ -13,7 +26,6 @@ export class NotificationService {
         if (Notification.permission === 'granted') return true;
         if (Notification.permission === 'denied') {
           console.warn('Native browser notification permission is denied');
-          // We still try Capacitor just in case, but usually this is final
         }
       }
 
@@ -23,7 +35,6 @@ export class NotificationService {
       const status = await LocalNotifications.requestPermissions();
       if (status.display === 'granted') return true;
 
-      // Final fallback: try native request if Capacitor failed or returned non-granted
       if ('Notification' in window && Notification.permission !== 'denied') {
         const nativeStatus = await Notification.requestPermission();
         return nativeStatus === 'granted';
@@ -32,8 +43,6 @@ export class NotificationService {
       return false;
     } catch (e) {
       console.error('Failed to request notification permissions:', e);
-      
-      // Last ditch effort for web
       if ('Notification' in window) {
         return Notification.permission === 'granted';
       }
@@ -42,8 +51,11 @@ export class NotificationService {
   }
 
   static async scheduleNotifications(userData: UserData) {
+    // IDs to cancel: 1-10 (daily quotes), 2 (monthly), 3 (birthday), 40-50 (weekly life)
+    const idsToCancel = [1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16, 40, 41, 42, 43];
+    
     if (!userData.notifications?.enabled) {
-      await LocalNotifications.cancel({ notifications: [{ id: 1 }, { id: 2 }, { id: 3 }] });
+      await LocalNotifications.cancel({ notifications: idsToCancel.map(id => ({ id })) });
       return;
     }
 
@@ -54,12 +66,11 @@ export class NotificationService {
     const t = translations[userData.language || 'ja'];
 
     // Cancel existing notifications to reschedule
-    await LocalNotifications.cancel({ notifications: [{ id: 1 }, { id: 2 }, { id: 3 }] });
+    await LocalNotifications.cancel({ notifications: idsToCancel.map(id => ({ id })) });
 
     const notifications = [];
     const [hours, minutes] = settings.dailyTime.split(':').map(Number);
 
-    // Helper to add minutes to the base time
     const getScheduledTime = (extraMinutes: number) => {
       let h = hours;
       let m = minutes + extraMinutes;
@@ -70,7 +81,7 @@ export class NotificationService {
       return { hour: h, minute: m };
     };
 
-    // 1. Birthday Notification (Priority 1 - at dailyTime)
+    // 1. Birthday Notification (ID: 3)
     if (settings.birthdayMessage) {
       const birthDate = parseISO(userData.birthDate);
       const time = getScheduledTime(0);
@@ -90,42 +101,80 @@ export class NotificationService {
       });
     }
 
-    // 2. Remaining Life Notification (Priority 2 - at dailyTime + 1 min)
-    if (settings.includeLifeRemaining) {
+    // 2. Daily Quote Notification (IDs: 10-16 for next 7 days)
+    if (settings.dailyQuote) {
+      const quotes = QUOTES[userData.language || 'ja'];
+      const time = getScheduledTime(1);
+      
+      for (let i = 0; i < 7; i++) {
+        const targetDate = addDays(new Date(), i);
+        const dayOfYear = Math.floor((targetDate.getTime() - startOfYear(targetDate).getTime()) / (1000 * 60 * 60 * 24));
+        const index = (targetDate.getFullYear() + dayOfYear) % quotes.length;
+        const quote = quotes[index];
+
+        notifications.push({
+          id: 10 + i,
+          title: t.quote,
+          body: quote,
+          schedule: {
+            allowWhileIdle: true,
+            at: new Date(
+              targetDate.getFullYear(),
+              targetDate.getMonth(),
+              targetDate.getDate(),
+              time.hour,
+              time.minute
+            )
+          }
+        });
+      }
+    }
+
+    // 3. Weekly Remaining Life Notification (IDs: 40-43 for next 4 weeks)
+    if (settings.weeklyLife) {
       const birthDate = parseISO(userData.birthDate);
       const expectancyYears = userData.lifeExpectancyOverride || 
         (LIFE_EXPECTANCY[userData.country] ? 
           (userData.gender === 'male' ? LIFE_EXPECTANCY[userData.country].male : LIFE_EXPECTANCY[userData.country].female) : 
           80);
       const deathDate = addYears(birthDate, expectancyYears);
-      const now = new Date();
-      
-      const years = differenceInYears(deathDate, now);
-      const dateAfterYears = addYears(now, years);
-      const months = differenceInMonths(deathDate, dateAfterYears);
-      const dateAfterMonths = addMonths(dateAfterYears, months);
-      const days = differenceInDays(deathDate, dateAfterMonths);
-      
-      const body = `${years}${t.yearLabel} ${months}${t.monthLabel} ${days}${t.weekLabel}`;
-      const time = getScheduledTime(1);
+      const time = getScheduledTime(2);
 
-      notifications.push({
-        id: 1,
-        title: t.remainingLife,
-        body: body,
-        schedule: {
-          allowWhileIdle: true,
-          on: {
-            hour: time.hour,
-            minute: time.minute
+      // Find next Monday (or beginning of week)
+      const now = new Date();
+      let nextMonday = new Date();
+      nextMonday.setDate(now.getDate() + ((7 - now.getDay() + 1) % 7 || 7));
+      
+      for (let i = 0; i < 4; i++) {
+        const targetDate = addDays(nextMonday, i * 7);
+        const years = differenceInYears(deathDate, targetDate);
+        const dateAfterYears = addYears(targetDate, years);
+        const months = differenceInMonths(deathDate, dateAfterYears);
+        const dateAfterMonths = addMonths(dateAfterYears, months);
+        const days = differenceInDays(deathDate, dateAfterMonths);
+        
+        const body = `${years}${t.yearLabel} ${months}${t.monthLabel} ${days}${t.weekLabel}`;
+
+        notifications.push({
+          id: 40 + i,
+          title: t.remainingLife,
+          body: body,
+          schedule: {
+            allowWhileIdle: true,
+            at: new Date(
+              targetDate.getFullYear(),
+              targetDate.getMonth(),
+              targetDate.getDate(),
+              time.hour,
+              time.minute
+            )
           }
-        }
-      });
+        });
+      }
     }
 
-    // 3. Monthly Update Notification (Priority 3 - at dailyTime + 2 min, 1st of month)
+    // 4. Monthly Update Notification (ID: 2)
     if (settings.monthlyUpdate) {
-      // Filter for annual goals only
       const annualGoals = userData.bucketList?.filter(i => i.category === 'annual') || [];
       const completedCount = annualGoals.filter(i => i.completed).length;
       const progress = annualGoals.length > 0 ? Math.round((completedCount / annualGoals.length) * 100) : 0;
@@ -142,7 +191,7 @@ export class NotificationService {
         body += goalProgressMsg.replace('{progress}', progress.toString()) + ' ' + keepItUp;
       }
 
-      const time = getScheduledTime(2);
+      const time = getScheduledTime(3);
 
       notifications.push({
         id: 2,

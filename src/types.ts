@@ -11,7 +11,8 @@ export type Language = 'ja' | 'en' | 'zh' | 'es' | 'fr';
 export interface NotificationSettings {
   enabled: boolean;
   dailyTime: string; // HH:mm
-  includeLifeRemaining: boolean;
+  dailyQuote: boolean;
+  weeklyLife: boolean;
   monthlyUpdate: boolean;
   birthdayMessage: boolean;
 }

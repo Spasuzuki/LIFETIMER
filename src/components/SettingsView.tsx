@@ -40,7 +40,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
     notifications: userData.notifications || {
       enabled: false,
       dailyTime: '09:00',
-      includeLifeRemaining: true,
+      dailyQuote: true,
+      weeklyLife: true,
       monthlyUpdate: true,
       birthdayMessage: true
     }
@@ -242,7 +243,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                           notifications: {
                             ...(prev.notifications || {
                               dailyTime: '09:00',
-                              includeLifeRemaining: true,
+                              dailyQuote: true,
+                              weeklyLife: true,
                               monthlyUpdate: true,
                               birthdayMessage: true
                             }),
@@ -309,7 +311,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
 
                           <div className="space-y-3">
                             {[
-                              { key: 'includeLifeRemaining', label: t.includeLifeRemaining },
+                              { key: 'dailyQuote', label: t.dailyQuote },
+                              { key: 'weeklyLife', label: t.weeklyLife },
                               { key: 'monthlyUpdate', label: t.monthlyUpdate },
                               { key: 'birthdayMessage', label: t.birthdayMessage },
                             ].map((item) => (
