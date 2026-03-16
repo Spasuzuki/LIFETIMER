@@ -24,7 +24,16 @@ const DEFAULT_USER_DATA: UserData = {
   birthDate: '1995-01-01',
   gender: 'male',
   country: 'Japan',
-  language: 'ja'
+  language: 'ja',
+  notifications: {
+    enabled: false,
+    dailyTime: '09:00',
+    dailyQuote: true,
+    quoteCategory: 'mementoMori',
+    weeklyLife: true,
+    monthlyUpdate: true,
+    birthdayMessage: true
+  }
 };
 
 export default function App() {

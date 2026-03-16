@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { UserData, Language } from '../types';
 import { COUNTRIES } from '../constants';
 import { COUNTRY_CODES } from '../countryCodes';
-import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart, Calendar, Clock, Send, ExternalLink } from 'lucide-react';
+import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart, Calendar, Clock, Send, ExternalLink, Lock, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LEGAL_CONTENT } from '../constants/legal';
 import { translations } from '../translations';
 import { NotificationService } from '../services/notificationService';
+import { PremiumModal } from './PremiumModal';
 
 // Helper to convert ISO country code to emoji flag
 const getFlagEmoji = (countryName: string) => {
@@ -41,6 +42,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
       enabled: false,
       dailyTime: '09:00',
       dailyQuote: true,
+      quoteCategory: 'mementoMori',
       weeklyLife: true,
       monthlyUpdate: true,
       birthdayMessage: true
@@ -48,6 +50,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
   });
   const [activeTab, setActiveTab] = useState<'general' | 'notifications'>('general');
   const [legalView, setLegalView] = useState<'privacy' | 'terms' | null>(null);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'denied'>('idle');
   const [browserPermission, setBrowserPermission] = useState<NotificationPermission | 'unsupported'>('default');
   const [isIframe, setIsIframe] = useState(false);
@@ -72,6 +75,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
+  };
+
+  const handlePurchase = () => {
+    // Simulate App Store purchase
+    setFormData(prev => ({ ...prev, isPremium: true }));
+    setIsPremiumModalOpen(false);
   };
 
   return (
@@ -228,6 +237,39 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
                       </div>
                     </div>
+
+                    <div className="pt-2">
+                      <div className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${
+                        formData.isPremium 
+                          ? 'bg-amber-500/10 border-amber-500/20' 
+                          : 'bg-zinc-800/50 border-zinc-800'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                            formData.isPremium ? 'bg-amber-500 text-black' : 'bg-zinc-700 text-zinc-400'
+                          }`}>
+                            <Crown className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-white">
+                              {formData.isPremium ? 'PREMIUM ACTIVE' : 'FREE VERSION'}
+                            </div>
+                            <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                              {formData.isPremium ? 'All features unlocked' : 'Limited features'}
+                            </div>
+                          </div>
+                        </div>
+                        {!formData.isPremium && (
+                          <button
+                            type="button"
+                            onClick={() => setIsPremiumModalOpen(true)}
+                            className="text-[10px] font-bold bg-white text-black px-3 py-1.5 rounded-lg uppercase tracking-wider hover:bg-zinc-200 transition-colors"
+                          >
+                            {t.upgradeToPremium}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </>
                 ) : (
                   <div className="space-y-4">
@@ -309,6 +351,59 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                             </div>
                           </div>
 
+                          <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-widest text-zinc-500 font-bold flex items-center gap-2">
+                              {t.quoteCategory}
+                              {!formData.isPremium && (
+                                <span className="bg-amber-500/10 text-amber-500 text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <Crown className="w-2 h-2" />
+                                  PRO
+                                </span>
+                              )}
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { id: 'mementoMori', label: t.mementoMori, premium: false },
+                                { id: 'stoicism', label: t.stoicism, premium: true },
+                                { id: 'zen', label: t.zen, premium: true },
+                                { id: 'entrepreneur', label: t.entrepreneur, premium: true },
+                              ].map((cat) => {
+                                const isLocked = cat.premium && !formData.isPremium;
+                                return (
+                                  <button
+                                    key={cat.id}
+                                    type="button"
+                                    onClick={() => {
+                                      if (isLocked) {
+                                        setIsPremiumModalOpen(true);
+                                        return;
+                                      }
+                                      setFormData({
+                                        ...formData,
+                                        notifications: { ...formData.notifications!, quoteCategory: cat.id as any }
+                                      });
+                                    }}
+                                    className={`relative p-3 rounded-xl border text-left transition-all ${
+                                      formData.notifications?.quoteCategory === cat.id
+                                        ? 'bg-white text-black border-white'
+                                        : 'bg-zinc-800/50 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                                    } ${isLocked ? 'opacity-60' : ''}`}
+                                  >
+                                    <div className="text-[10px] font-bold uppercase tracking-wider truncate pr-4">
+                                      {cat.label}
+                                    </div>
+                                    {isLocked && (
+                                      <Lock className="absolute right-2 top-2 w-3 h-3 text-zinc-500" />
+                                    )}
+                                    {cat.premium && !isLocked && (
+                                      <Crown className="absolute right-2 top-2 w-3 h-3 text-amber-500" />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
                           <div className="space-y-3">
                             {[
                               { key: 'dailyQuote', label: t.dailyQuote },
@@ -374,6 +469,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
           )}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {isPremiumModalOpen && (
+          <PremiumModal
+            language={formData.language}
+            onClose={() => setIsPremiumModalOpen(false)}
+            onPurchase={handlePurchase}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

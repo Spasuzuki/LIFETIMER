@@ -86,7 +86,10 @@ export const TimerView: React.FC<TimerViewProps> = ({ userData }) => {
   const yearRemaining = calculateRemaining(endOfYear(now));
 
   const getDailyQuote = () => {
-    const quotes = QUOTES[userData.language || 'ja'];
+    const lang = userData.language || 'ja';
+    const category = userData.notifications?.quoteCategory || 'mementoMori';
+    const quotes = QUOTES[lang][category];
+    
     const dayOfYear = Math.floor((now.getTime() - startOfYear(now).getTime()) / (1000 * 60 * 60 * 24));
     const index = (now.getFullYear() + dayOfYear) % quotes.length;
     return quotes[index];

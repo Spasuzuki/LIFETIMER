@@ -53,6 +53,7 @@ export class NotificationService {
   static async scheduleNotifications(userData: UserData) {
     // IDs to cancel: 1-10 (daily quotes), 2 (monthly), 3 (birthday), 40-50 (weekly life)
     const idsToCancel = [1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16, 40, 41, 42, 43];
+    const now = new Date();
     
     if (!userData.notifications?.enabled) {
       await LocalNotifications.cancel({ notifications: idsToCancel.map(id => ({ id })) });
@@ -103,14 +104,29 @@ export class NotificationService {
 
     // 2. Daily Quote Notification (IDs: 10-16 for next 7 days)
     if (settings.dailyQuote) {
-      const quotes = QUOTES[userData.language || 'ja'];
+      const lang = userData.language || 'ja';
+      const category = settings.quoteCategory || 'mementoMori';
+      const quotes = QUOTES[lang][category];
       const time = getScheduledTime(1);
       
       for (let i = 0; i < 7; i++) {
-        const targetDate = addDays(new Date(), i);
+        const targetDate = addDays(now, i);
         const dayOfYear = Math.floor((targetDate.getTime() - startOfYear(targetDate).getTime()) / (1000 * 60 * 60 * 24));
         const index = (targetDate.getFullYear() + dayOfYear) % quotes.length;
         const quote = quotes[index];
+
+        const scheduledDate = new Date(
+          targetDate.getFullYear(),
+          targetDate.getMonth(),
+          targetDate.getDate(),
+          time.hour,
+          time.minute
+        );
+
+        // If the scheduled time for today has already passed, skip today
+        if (scheduledDate <= now) {
+          continue; 
+        }
 
         notifications.push({
           id: 10 + i,
@@ -118,13 +134,7 @@ export class NotificationService {
           body: quote,
           schedule: {
             allowWhileIdle: true,
-            at: new Date(
-              targetDate.getFullYear(),
-              targetDate.getMonth(),
-              targetDate.getDate(),
-              time.hour,
-              time.minute
-            )
+            at: scheduledDate
           }
         });
       }
@@ -141,8 +151,7 @@ export class NotificationService {
       const time = getScheduledTime(2);
 
       // Find next Monday (or beginning of week)
-      const now = new Date();
-      let nextMonday = new Date();
+      let nextMonday = new Date(now);
       nextMonday.setDate(now.getDate() + ((7 - now.getDay() + 1) % 7 || 7));
       
       for (let i = 0; i < 4; i++) {
@@ -155,19 +164,23 @@ export class NotificationService {
         
         const body = `${years}${t.yearLabel} ${months}${t.monthLabel} ${days}${t.weekLabel}`;
 
+        const scheduledDate = new Date(
+          targetDate.getFullYear(),
+          targetDate.getMonth(),
+          targetDate.getDate(),
+          time.hour,
+          time.minute
+        );
+
+        if (scheduledDate <= now) continue;
+
         notifications.push({
           id: 40 + i,
           title: t.remainingLife,
           body: body,
           schedule: {
             allowWhileIdle: true,
-            at: new Date(
-              targetDate.getFullYear(),
-              targetDate.getMonth(),
-              targetDate.getDate(),
-              time.hour,
-              time.minute
-            )
+            at: scheduledDate
           }
         });
       }

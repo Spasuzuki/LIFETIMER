@@ -4,14 +4,18 @@ export interface BucketListItem {
   completed: boolean;
   completedAt?: number;
   category?: 'annual' | 'life';
+  memo?: string;
 }
 
 export type Language = 'ja' | 'en' | 'zh' | 'es' | 'fr';
+
+export type QuoteCategory = 'mementoMori' | 'stoicism' | 'zen' | 'entrepreneur';
 
 export interface NotificationSettings {
   enabled: boolean;
   dailyTime: string; // HH:mm
   dailyQuote: boolean;
+  quoteCategory: QuoteCategory;
   weeklyLife: boolean;
   monthlyUpdate: boolean;
   birthdayMessage: boolean;
@@ -25,6 +29,7 @@ export interface UserData {
   lifeExpectancyOverride?: number;
   bucketList?: BucketListItem[];
   notifications?: NotificationSettings;
+  isPremium?: boolean;
 }
 
 export interface LifeExpectancyData {
