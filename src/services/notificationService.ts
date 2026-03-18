@@ -18,34 +18,27 @@ import {
 } from 'date-fns';
 
 export class NotificationService {
+  static async getPermissionStatus(): Promise<'default' | 'granted' | 'denied' | 'unsupported'> {
+    try {
+      const check = await LocalNotifications.checkPermissions();
+      if (check.display === 'granted') return 'granted';
+      if (check.display === 'denied') return 'denied';
+      return 'default';
+    } catch (e) {
+      console.error('Failed to check notification permissions:', e);
+      return 'unsupported';
+    }
+  }
+
   static async requestPermissions() {
     try {
-      // First check native browser permission if available
-      if ('Notification' in window) {
-        console.log('Native browser Notification.permission:', Notification.permission);
-        if (Notification.permission === 'granted') return true;
-        if (Notification.permission === 'denied') {
-          console.warn('Native browser notification permission is denied');
-        }
-      }
-
       const check = await LocalNotifications.checkPermissions();
       if (check.display === 'granted') return true;
       
       const status = await LocalNotifications.requestPermissions();
-      if (status.display === 'granted') return true;
-
-      if ('Notification' in window && Notification.permission !== 'denied') {
-        const nativeStatus = await Notification.requestPermission();
-        return nativeStatus === 'granted';
-      }
-
-      return false;
+      return status.display === 'granted';
     } catch (e) {
       console.error('Failed to request notification permissions:', e);
-      if ('Notification' in window) {
-        return Notification.permission === 'granted';
-      }
       return false;
     }
   }
@@ -229,37 +222,12 @@ export class NotificationService {
   static async sendTestNotification(t: any) {
     console.log('Attempting to send test notification...');
     
-    // Log native status for debugging
-    if ('Notification' in window) {
-      console.log('Current native Notification.permission:', Notification.permission);
-    }
-
     const granted = await this.requestPermissions();
     console.log('Permission status after request:', granted);
     
     if (!granted) {
       console.warn('Notification permission not granted');
       return 'denied';
-    }
-
-    // On web, native Notification API is often the most reliable for immediate feedback
-    if ('Notification' in window && Notification.permission === 'granted') {
-      try {
-        const n = new Notification('LIFE TIMER', {
-          body: t.testNotificationMsg || 'This is a test notification! It works! ✨',
-          tag: 'life-timer-test'
-        });
-        
-        n.onclick = () => {
-          window.focus();
-          n.close();
-        };
-        
-        console.log('Native test notification sent successfully');
-        // We still try Capacitor as well to ensure it's also working
-      } catch (e) {
-        console.error('Native Notification API failed', e);
-      }
     }
 
     try {
@@ -278,11 +246,6 @@ export class NotificationService {
       return 'success';
     } catch (e) {
       console.error('Failed to schedule Capacitor notification:', e);
-      
-      // If we already sent a native one, we can still return success
-      if ('Notification' in window && Notification.permission === 'granted') {
-        return 'success';
-      }
       return 'error';
     }
   }

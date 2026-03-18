@@ -9,7 +9,7 @@ import { SettingsView } from './components/SettingsView';
 import { TimerView } from './components/TimerView';
 import { BucketListView } from './components/BucketListView';
 import { BirthdayModal } from './components/BirthdayModal';
-import { Settings as SettingsIcon, Menu } from 'lucide-react';
+import { Settings as SettingsIcon, Menu, Activity, Unlock } from 'lucide-react';
 import { CustomHourglass } from './components/CustomHourglass';
 import { AnimatePresence, motion } from 'motion/react';
 import { translations } from './translations';
@@ -17,6 +17,8 @@ import { NotificationService } from './services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { differenceInYears, parseISO, isSameDay, addYears, addMonths, differenceInMonths, differenceInWeeks, differenceInDays } from 'date-fns';
 import { COUNTRIES, LIFE_EXPECTANCY } from './constants';
+import { BiorhythmView } from './components/BiorhythmView';
+import { PremiumModal } from './components/PremiumModal';
 
 const STORAGE_KEY = 'life-timer-user-data';
 
@@ -33,13 +35,16 @@ const DEFAULT_USER_DATA: UserData = {
     weeklyLife: true,
     monthlyUpdate: true,
     birthdayMessage: true
-  }
+  },
+  isPremium: false
 };
 
 export default function App() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isBucketListOpen, setIsBucketListOpen] = useState(false);
+  const [isBiorhythmOpen, setIsBiorhythmOpen] = useState(false);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isBirthdayOpen, setIsBirthdayOpen] = useState(false);
   const [seconds, setSeconds] = useState(new Date().getSeconds());
@@ -82,9 +87,11 @@ export default function App() {
     if (saved) {
       try {
         const data = JSON.parse(saved);
-        setUserData(data);
-        checkBirthday(data);
-        NotificationService.scheduleNotifications(data);
+        // Force premium to false for preview purposes as requested
+        const previewData = { ...data, isPremium: false };
+        setUserData(previewData);
+        checkBirthday(previewData);
+        NotificationService.scheduleNotifications(previewData);
       } catch (e) {
         setUserData(DEFAULT_USER_DATA);
       }
@@ -100,6 +107,14 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     setIsSettingsOpen(false);
     NotificationService.scheduleNotifications(data);
+  };
+
+  const handlePurchase = () => {
+    if (!userData) return;
+    const newData = { ...userData, isPremium: true };
+    setUserData(newData);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+    setIsPremiumModalOpen(false);
   };
 
   const handleUpdateBucketList = (items: BucketListItem[]) => {
@@ -152,6 +167,33 @@ export default function App() {
             <motion.button
               whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.05)' }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                if (userData?.isPremium) {
+                  setIsBiorhythmOpen(true);
+                } else {
+                  setIsPremiumModalOpen(true);
+                }
+              }}
+              className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-zinc-900/40 border border-zinc-800/50 rounded-full transition-all group relative"
+            >
+              <Activity className={`w-5 h-5 transition-colors ${userData?.isPremium ? 'text-emerald-500 group-hover:text-emerald-400' : 'text-zinc-500 group-hover:text-white'}`} />
+              {!userData?.isPremium && (
+                <div className="absolute -top-1 -right-1">
+                  <div className="bg-amber-500 rounded-full p-0.5 shadow-lg">
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <Unlock className="w-2 h-2 text-black" />
+                    </motion.div>
+                  </div>
+                </div>
+              )}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.05)' }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setIsBucketListOpen(true)}
               className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-zinc-900/40 border border-zinc-800/50 rounded-full transition-all group relative"
             >
@@ -197,6 +239,27 @@ export default function App() {
             language={userData?.language || 'ja'}
             onUpdate={handleUpdateBucketList}
             onClose={() => setIsBucketListOpen(false)}
+            isPremium={userData?.isPremium}
+            onUpgrade={() => {
+              setIsBucketListOpen(false);
+              setIsPremiumModalOpen(true);
+            }}
+          />
+        )}
+        {isBiorhythmOpen && userData && (
+          <BiorhythmView
+            key="biorhythm-view"
+            birthDate={userData.birthDate}
+            language={userData.language}
+            onClose={() => setIsBiorhythmOpen(false)}
+          />
+        )}
+        {isPremiumModalOpen && userData && (
+          <PremiumModal
+            key="premium-modal"
+            language={userData.language}
+            onClose={() => setIsPremiumModalOpen(false)}
+            onPurchase={handlePurchase}
           />
         )}
         {isBirthdayOpen && userData && (

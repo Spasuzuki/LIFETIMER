@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BucketListItem, Language } from '../types';
-import { X, Plus, CheckCircle2, Circle, Trash2, ListTodo, RotateCcw, StickyNote, Save } from 'lucide-react';
+import { X, Plus, CheckCircle2, Circle, Trash2, ListTodo, RotateCcw, StickyNote, Save, Unlock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
 
@@ -9,9 +9,11 @@ interface BucketListViewProps {
   language: Language;
   onUpdate: (items: BucketListItem[]) => void;
   onClose: () => void;
+  isPremium?: boolean;
+  onUpgrade?: () => void;
 }
 
-export const BucketListView: React.FC<BucketListViewProps> = ({ items, language, onUpdate, onClose }) => {
+export const BucketListView: React.FC<BucketListViewProps> = ({ items, language, onUpdate, onClose, isPremium, onUpgrade }) => {
   const [newItemText, setNewItemText] = useState('');
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [activeCategory, setActiveCategory] = useState<'annual' | 'life'>('annual');
@@ -223,11 +225,22 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
                     {item.completed && (
                       <>
                         <button 
-                          onClick={() => startEditingMemo(item)}
+                          onClick={() => {
+                            if (isPremium) {
+                              startEditingMemo(item);
+                            } else if (onUpgrade) {
+                              onUpgrade();
+                            }
+                          }}
                           title={t.memo}
-                          className={`p-1 transition-colors ${editingMemoId === item.id ? 'text-white' : 'text-zinc-600 hover:text-white'}`}
+                          className={`p-1 transition-colors ${editingMemoId === item.id ? 'text-white' : 'text-zinc-600 hover:text-white'} relative`}
                         >
                           <StickyNote className="w-4 h-4" />
+                          {!isPremium && (
+                            <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-0.5 shadow-lg">
+                              <Unlock className="w-2 h-2 text-black" />
+                            </div>
+                          )}
                         </button>
                         <button 
                           onClick={() => toggleItem(item.id)}

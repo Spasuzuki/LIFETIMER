@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserData, Language } from '../types';
 import { COUNTRIES } from '../constants';
 import { COUNTRY_CODES } from '../countryCodes';
-import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart, Calendar, Clock, Send, ExternalLink, Lock, Crown } from 'lucide-react';
+import { Settings, X, ChevronDown, ArrowLeft, Bell, User, Heart, Calendar, Clock, Send, ExternalLink, Unlock, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LEGAL_CONTENT } from '../constants/legal';
 import { translations } from '../translations';
@@ -254,18 +254,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                             <div className="text-sm font-bold text-white">
                               {formData.isPremium ? 'PREMIUM ACTIVE' : 'FREE VERSION'}
                             </div>
-                            <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                              {formData.isPremium ? 'All features unlocked' : 'Limited features'}
-                            </div>
+                            {formData.isPremium && (
+                              <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                                All features unlocked
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {!formData.isPremium && (
+                        {formData.isPremium ? null : (
                           <button
                             type="button"
                             onClick={() => setIsPremiumModalOpen(true)}
-                            className="text-[10px] font-bold bg-white text-black px-3 py-1.5 rounded-lg uppercase tracking-wider hover:bg-zinc-200 transition-colors"
+                            className="text-[10px] font-bold bg-white text-black px-3 py-1.5 rounded-lg uppercase tracking-wider hover:bg-zinc-200 transition-colors text-center leading-tight"
                           >
-                            {t.upgradeToPremium}
+                            {formData.language === 'ja' ? (
+                              <>プレミアムに<br />アップグレード</>
+                            ) : t.upgradeToPremium}
                           </button>
                         )}
                       </div>
@@ -393,7 +397,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                                       {cat.label}
                                     </div>
                                     {isLocked && (
-                                      <Lock className="absolute right-2 top-2 w-3 h-3 text-zinc-500" />
+                                      <Unlock className="absolute right-2 top-2 w-3 h-3 text-zinc-500" />
                                     )}
                                     {cat.premium && !isLocked && (
                                       <Crown className="absolute right-2 top-2 w-3 h-3 text-amber-500" />
