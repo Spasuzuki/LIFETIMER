@@ -1,4 +1,5 @@
-import React from 'react';
+import * as React from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { X, Activity, Brain, Heart, Info } from 'lucide-react';
 import { translations } from '../translations';

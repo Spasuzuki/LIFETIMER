@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { UserData, BucketListItem } from './types';
 import { SettingsView } from './components/SettingsView';
@@ -15,6 +16,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { translations } from './translations';
 import { NotificationService } from './services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { RevenueCatService } from './services/revenueCatService';
 import { differenceInYears, parseISO, isSameDay, addYears, addMonths, differenceInMonths, differenceInWeeks, differenceInDays } from 'date-fns';
 import { COUNTRIES, LIFE_EXPECTANCY } from './constants';
 import { BiorhythmView } from './components/BiorhythmView';
@@ -39,7 +41,7 @@ const DEFAULT_USER_DATA: UserData = {
   isPremium: false
 };
 
-export default function App() {
+const App = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isBucketListOpen, setIsBucketListOpen] = useState(false);
@@ -48,6 +50,20 @@ export default function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isBirthdayOpen, setIsBirthdayOpen] = useState(false);
   const [seconds, setSeconds] = useState(new Date().getSeconds());
+
+  const checkBirthday = (data: UserData) => {
+    const birthDate = parseISO(data.birthDate);
+    const today = new Date();
+    const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+    if (isSameDay(thisYearBirthday, today)) {
+      const lastBirthdayShown = sessionStorage.getItem('last-birthday-shown');
+      const todayStr = today.toISOString().split('T')[0];
+      if (lastBirthdayShown !== todayStr) {
+        setIsBirthdayOpen(true);
+        sessionStorage.setItem('last-birthday-shown', todayStr);
+      }
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setSeconds(new Date().getSeconds()), 1000);
@@ -68,38 +84,29 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const checkBirthday = (data: UserData) => {
-      const birthDate = parseISO(data.birthDate);
-      const today = new Date();
-      // Check if today is birthday (ignoring year)
-      const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-      if (isSameDay(thisYearBirthday, today)) {
-        const lastBirthdayShown = sessionStorage.getItem('last-birthday-shown');
-        const todayStr = today.toISOString().split('T')[0];
-        if (lastBirthdayShown !== todayStr) {
-          setIsBirthdayOpen(true);
-          sessionStorage.setItem('last-birthday-shown', todayStr);
+    const initApp = async () => {
+      await RevenueCatService.initialize();
+      const isPremium = await RevenueCatService.isPremium();
+      
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          const updatedData = { ...data, isPremium };
+          setUserData(updatedData);
+          checkBirthday(updatedData);
+          NotificationService.scheduleNotifications(updatedData);
+        } catch (e) {
+          setUserData({ ...DEFAULT_USER_DATA, isPremium });
         }
+      } else {
+        setUserData({ ...DEFAULT_USER_DATA, isPremium });
+        setIsSettingsOpen(true);
       }
+      setIsInitialized(true);
     };
 
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        // Force premium to false for preview purposes as requested
-        const previewData = { ...data, isPremium: false };
-        setUserData(previewData);
-        checkBirthday(previewData);
-        NotificationService.scheduleNotifications(previewData);
-      } catch (e) {
-        setUserData(DEFAULT_USER_DATA);
-      }
-    } else {
-      setUserData(DEFAULT_USER_DATA);
-      setIsSettingsOpen(true);
-    }
-    setIsInitialized(true);
+    initApp();
   }, []);
 
   const handleSaveSettings = (data: UserData) => {
@@ -109,12 +116,15 @@ export default function App() {
     NotificationService.scheduleNotifications(data);
   };
 
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     if (!userData) return;
-    const newData = { ...userData, isPremium: true };
-    setUserData(newData);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
-    setIsPremiumModalOpen(false);
+    const isPremium = await RevenueCatService.isPremium();
+    if (isPremium) {
+      const newData = { ...userData, isPremium: true };
+      setUserData(newData);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+      setIsPremiumModalOpen(false);
+    }
   };
 
   const handleUpdateBucketList = (items: BucketListItem[]) => {
@@ -293,4 +303,6 @@ export default function App() {
       <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.02] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,118,0.06))] bg-[length:100%_2px,3px_100%]" />
     </div>
   );
-}
+};
+
+export default App;

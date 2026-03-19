@@ -1,8 +1,11 @@
-import React from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Crown, Check, ShieldCheck, Zap, Sparkles, Activity, StickyNote } from 'lucide-react';
+import { X, Crown, Check, ShieldCheck, Zap, Sparkles, Activity, StickyNote, Loader2 } from 'lucide-react';
 import { translations } from '../translations';
 import { Language } from '../types';
+import { RevenueCatService } from '../services/revenueCatService';
+import { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 
 interface PremiumModalProps {
   language: Language;
@@ -12,6 +15,40 @@ interface PremiumModalProps {
 
 export const PremiumModal: React.FC<PremiumModalProps> = ({ language, onClose, onPurchase }) => {
   const t = translations[language || 'ja'];
+  const [offering, setOffering] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState(false);
+
+  useEffect(() => {
+    const fetchOffering = async () => {
+      const currentOffering = await RevenueCatService.getOfferings();
+      setOffering(currentOffering);
+      setLoading(false);
+    };
+    fetchOffering();
+  }, []);
+
+  const handlePurchase = async () => {
+    if (!offering || offering.availablePackages.length === 0) return;
+    
+    setPurchasing(true);
+    const success = await RevenueCatService.purchasePackage(offering.availablePackages[0]);
+    setPurchasing(false);
+    
+    if (success) {
+      onPurchase();
+    }
+  };
+
+  const handleRestore = async () => {
+    setPurchasing(true);
+    const success = await RevenueCatService.restorePurchases();
+    setPurchasing(false);
+    
+    if (success) {
+      onPurchase();
+    }
+  };
 
   return (
     <motion.div
@@ -76,20 +113,35 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({ language, onClose, o
 
           <div className="w-full space-y-3">
             <button
-              onClick={onPurchase}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 transition-all active:scale-[0.98] uppercase tracking-widest text-sm"
+              onClick={handlePurchase}
+              disabled={loading || purchasing || !offering}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 transition-all active:scale-[0.98] uppercase tracking-widest text-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {t.purchase}
+              {purchasing ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  {t.purchase}
+                  {offering?.availablePackages[0]?.product.priceString && (
+                    <span className="ml-2 opacity-80">({offering.availablePackages[0].product.priceString})</span>
+                  )}
+                </>
+              )}
             </button>
             <button
               onClick={onClose}
-              className="w-full bg-transparent text-zinc-500 font-bold py-3 rounded-2xl hover:text-zinc-300 transition-colors uppercase tracking-widest text-xs"
+              disabled={purchasing}
+              className="w-full bg-transparent text-zinc-500 font-bold py-3 rounded-2xl hover:text-zinc-300 transition-colors uppercase tracking-widest text-xs disabled:opacity-50"
             >
               {t.cancel}
             </button>
           </div>
 
-          <button className="mt-6 text-[10px] text-zinc-600 uppercase tracking-widest font-bold hover:text-zinc-400 transition-colors">
+          <button 
+            onClick={handleRestore}
+            disabled={purchasing}
+            className="mt-6 text-[10px] text-zinc-600 uppercase tracking-widest font-bold hover:text-zinc-400 transition-colors disabled:opacity-50"
+          >
             {t.restorePurchase}
           </button>
         </div>

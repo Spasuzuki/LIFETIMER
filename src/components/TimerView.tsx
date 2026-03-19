@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { 
   differenceInSeconds, 
   differenceInDays, 
@@ -14,10 +15,10 @@ import {
   endOfYear,
   format
 } from 'date-fns';
-import { UserData } from '../types';
+import { UserData, QuoteCategory } from '../types';
 import { LIFE_EXPECTANCY } from '../constants';
 import { QUOTES } from '../constants/quotes';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
 
 interface TimerViewProps {
@@ -36,12 +37,31 @@ interface TimeRemaining {
 export const TimerView: React.FC<TimerViewProps> = ({ userData }) => {
   const [now, setNow] = useState(new Date());
   const [currentAnimatedProgress, setCurrentAnimatedProgress] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<QuoteCategory>(
+    userData.notifications?.quoteCategory || 'mementoMori'
+  );
   const t = translations[userData.language || 'ja'];
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    // Sync with userData category if it changes in settings
+    if (userData.notifications?.quoteCategory) {
+      setActiveCategory(userData.notifications.quoteCategory);
+    }
+  }, [userData.notifications?.quoteCategory]);
+
+  const cycleCategory = () => {
+    if (!userData.isPremium) return;
+    
+    const categories: QuoteCategory[] = ['mementoMori', 'stoicism', 'zen', 'entrepreneur'];
+    const currentIndex = categories.indexOf(activeCategory);
+    const nextIndex = (currentIndex + 1) % categories.length;
+    setActiveCategory(categories[nextIndex]);
+  };
 
   const getLifeExpectancy = () => {
     const data = LIFE_EXPECTANCY[userData.country] || Object.values(LIFE_EXPECTANCY)[0];
@@ -87,8 +107,7 @@ export const TimerView: React.FC<TimerViewProps> = ({ userData }) => {
 
   const getDailyQuote = () => {
     const lang = userData.language || 'ja';
-    const category = userData.notifications?.quoteCategory || 'mementoMori';
-    const quotes = QUOTES[lang][category];
+    const quotes = QUOTES[lang][activeCategory];
     
     const dayOfYear = Math.floor((now.getTime() - startOfYear(now).getTime()) / (1000 * 60 * 60 * 24));
     const index = (now.getFullYear() + dayOfYear) % quotes.length;
@@ -204,12 +223,31 @@ export const TimerView: React.FC<TimerViewProps> = ({ userData }) => {
         className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 mb-10 sm:mb-12 shadow-[0_30px_60px_rgba(0,0,0,0.4)]"
       >
         <div className="text-center">
-          <h3 className="text-black text-xs sm:text-base font-black tracking-[0.35em] uppercase mb-1 sm:mb-2">
-            {t.quote.toUpperCase()}
-          </h3>
-          <p className="text-zinc-800 text-sm sm:text-xl font-serif italic leading-[1.5] sm:leading-[1.6]">
-            "{dailyQuote}"
-          </p>
+          <button 
+            onClick={cycleCategory}
+            disabled={!userData.isPremium}
+            className={`w-full group outline-none ${userData.isPremium ? 'cursor-pointer' : 'cursor-default'}`}
+          >
+            <div className="flex flex-col items-center">
+              <h3 className={`text-xs sm:text-base font-black tracking-[0.35em] uppercase mb-1 sm:mb-2 transition-all ${userData.isPremium ? 'text-sky-600 group-hover:text-sky-500' : 'text-black'}`}>
+                {t[activeCategory].toUpperCase()}
+              </h3>
+              <div className="relative w-full min-h-[3rem] sm:min-h-[4rem] flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.p 
+                    key={dailyQuote}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-zinc-800 text-sm sm:text-xl font-serif italic leading-[1.5] sm:leading-[1.6]"
+                  >
+                    "{dailyQuote}"
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+            </div>
+          </button>
         </div>
       </motion.div>
 

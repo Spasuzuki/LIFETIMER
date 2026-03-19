@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { UserData, Language } from '../types';
 import { COUNTRIES } from '../constants';
 import { COUNTRY_CODES } from '../countryCodes';
@@ -57,7 +58,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsIframe(window.self !== window.top);
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);

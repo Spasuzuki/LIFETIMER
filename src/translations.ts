@@ -2,7 +2,7 @@ import { Language } from './types';
 
 export const translations: Record<Language, any> = {
   ja: {
-    title: 'LIFE TIMER',
+    title: 'Count-down',
     subtitle: 'Memento Mori',
     settings: '設定',
     bucketList: 'バケットリスト',
@@ -106,7 +106,7 @@ export const translations: Record<Language, any> = {
     goal100Msg: 'すべての目標を達成しました！'
   },
   en: {
-    title: 'LIFE TIMER',
+    title: 'Count-down',
     subtitle: 'Memento Mori',
     settings: 'Settings',
     bucketList: 'Bucket List',
@@ -208,7 +208,7 @@ export const translations: Record<Language, any> = {
     goal100Msg: 'You achieved all goals!'
   },
   zh: {
-    title: '人生倒计时',
+    title: 'Count-down',
     subtitle: 'Memento Mori',
     settings: '设置',
     bucketList: '人生清单',
@@ -299,7 +299,7 @@ export const translations: Record<Language, any> = {
     goal100Msg: '你已完成所有目标！'
   },
   es: {
-    title: 'TEMPORIZADOR DE VIDA',
+    title: 'Count-down',
     subtitle: 'Memento Mori',
     settings: 'Ajustes',
     bucketList: 'Lista de Deseos',
@@ -390,7 +390,7 @@ export const translations: Record<Language, any> = {
     goal100Msg: '¡Has alcanzado todos tus objetivos!'
   },
   fr: {
-    title: 'CHRONOMÈTRE DE VIE',
+    title: 'Count-down',
     subtitle: 'Memento Mori',
     settings: 'Paramètres',
     bucketList: 'Liste de Souhaits',

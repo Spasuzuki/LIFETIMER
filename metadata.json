@@ -1,5 +1,5 @@
 {
-  "name": "LIFE TIMER",
+  "name": "Count-down",
   "description": "A digital memento mori clock that visualizes your remaining time based on life expectancy.",
   "requestFramePermissions": ["notifications"]
 }
