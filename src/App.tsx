@@ -22,10 +22,10 @@ import { COUNTRIES, LIFE_EXPECTANCY } from './constants';
 import { BiorhythmView } from './components/BiorhythmView';
 import { PremiumModal } from './components/PremiumModal';
 
-const STORAGE_KEY = 'life-timer-user-data';
+const STORAGE_KEY = 'bucket-list-user-data';
 
 const DEFAULT_USER_DATA: UserData = {
-  birthDate: '1995-01-01',
+  birthDate: '1995-04-01',
   gender: 'male',
   country: 'Japan',
   language: 'ja',

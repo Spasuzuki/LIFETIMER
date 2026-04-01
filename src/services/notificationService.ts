@@ -236,7 +236,7 @@ export class NotificationService {
         notifications: [
           {
             id: Math.floor(Math.random() * 10000),
-            title: 'LIFE TIMER',
+            title: 'Bucket List',
             body: t.testNotificationMsg || 'This is a test notification! It works! ✨',
             schedule: { at: new Date(Date.now() + 1000) } 
           }
