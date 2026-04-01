@@ -1,4 +1,4 @@
-# LIFE TIMER - Local Setup Guide
+# Bucket List - Local Setup Guide
 
 This project was generated in AI Studio and is ready to be built for iOS using Capacitor.
 

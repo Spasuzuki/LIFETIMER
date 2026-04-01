@@ -1,6 +1,6 @@
 {
-  "name": "LIFE TIMER",
-  "short_name": "LIFE TIMER",
+  "name": "Bucket List",
+  "short_name": "Bucket List",
   "description": "A digital memento mori clock that visualizes your remaining time.",
   "start_url": "/",
   "display": "standalone",

@@ -73,7 +73,8 @@ export class RevenueCatService {
 
   static async isPremium() {
     if (!this.isNative()) {
-      return false;
+      // プレビュー（Web）環境では、開発・確認用に常にプレミアムとして扱う
+      return true;
     }
     try {
       const { customerInfo } = await Purchases.getCustomerInfo();

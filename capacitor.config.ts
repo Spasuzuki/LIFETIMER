@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.spasuzuking.lifetimer',
-  appName: 'LIFE TIMER',
+  appName: 'Bucket List',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
