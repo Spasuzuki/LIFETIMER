@@ -13,7 +13,7 @@ export class RevenueCatService {
   static async initialize() {
     if (this.initialized || !this.isNative()) return;
 
-    const apiKey = process.env.VITE_REVENUECAT_API_KEY_IOS || 'REVENUECAT_API_KEY_IOS';
+    const apiKey = import.meta.env.VITE_REVENUECAT_API_KEY_IOS || 'REVENUECAT_API_KEY_IOS';
     
     try {
       await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
