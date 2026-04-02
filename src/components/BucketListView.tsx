@@ -21,6 +21,7 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
   const [editingCountId, setEditingCountId] = useState<string | null>(null);
   const [memoText, setMemoText] = useState('');
   const [countInput, setCountInput] = useState('');
+  const [noteInput, setNoteInput] = useState('');
   const t = translations[language || 'ja'];
 
   const addItem = (e: React.FormEvent) => {
@@ -33,7 +34,8 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
       completed: false,
       category: activeCategory,
       currentCount: 0,
-      targetCount: 1
+      targetCount: 1,
+      note: ''
     };
     
     onUpdate([...items, newItem]);
@@ -66,7 +68,7 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
     }));
   };
 
-  const saveTargetCount = (id: string) => {
+  const saveGoalSettings = (id: string) => {
     const count = parseInt(countInput);
     if (isNaN(count) || count < 1) return;
 
@@ -76,6 +78,7 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
         return { 
           ...item, 
           targetCount: count,
+          note: noteInput.trim(),
           completed: isCompleted,
           completedAt: isCompleted ? (item.completedAt || Date.now()) : undefined
         };
@@ -108,6 +111,7 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
   const startEditingCount = (item: BucketListItem) => {
     setEditingCountId(item.id);
     setCountInput(String(item.targetCount || 1));
+    setNoteInput(item.note || '');
   };
 
   const activeItems = items.filter(i => !i.completed);
@@ -252,6 +256,12 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
                         {item.text}
                       </div>
                       
+                      {item.note && (
+                        <div className="text-[10px] text-zinc-500 mt-0.5 italic">
+                          {item.note}
+                        </div>
+                      )}
+
                       {isMultiStep && !item.completed && (
                         <div className="mt-2 space-y-1">
                           <div className="flex items-center justify-between text-[8px] font-mono text-zinc-500 uppercase tracking-widest">
@@ -344,31 +354,43 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden px-1"
                       >
-                        <div className="flex items-center gap-2 p-2 bg-zinc-800 border border-zinc-700 rounded-lg">
-                          <div className="flex-1 flex items-center gap-2">
+                        <div className="flex flex-col gap-3 p-3 bg-zinc-800 border border-zinc-700 rounded-lg">
+                          <div className="flex items-center gap-2">
                             <span className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.targetCount}</span>
                             <input
                               type="number"
                               min="1"
-                              autoFocus
                               value={countInput}
                               onChange={(e) => setCountInput(e.target.value)}
                               className="w-16 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white focus:outline-none"
                             />
                             <span className="text-[10px] text-zinc-500">{t.times}</span>
                           </div>
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => saveTargetCount(item.id)}
-                              className="p-1.5 bg-white text-black rounded hover:bg-zinc-200 transition-colors"
-                            >
-                              <Save className="w-3.5 h-3.5" />
-                            </button>
+                          
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.noteLabel}</span>
+                            <textarea
+                              autoFocus
+                              value={noteInput}
+                              onChange={(e) => setNoteInput(e.target.value)}
+                              placeholder={t.notePlaceholder}
+                              className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white focus:outline-none resize-none min-h-[60px]"
+                            />
+                          </div>
+
+                          <div className="flex gap-2 justify-end">
                             <button
                               onClick={() => setEditingCountId(null)}
-                              className="p-1.5 bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition-colors"
+                              className="px-3 py-1.5 bg-zinc-700 text-zinc-300 rounded text-xs hover:bg-zinc-600 transition-colors"
                             >
-                              <X className="w-3.5 h-3.5" />
+                              {t.cancel}
+                            </button>
+                            <button
+                              onClick={() => saveGoalSettings(item.id)}
+                              className="px-3 py-1.5 bg-white text-black rounded text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center gap-1.5"
+                            >
+                              <Save className="w-3.5 h-3.5" />
+                              {t.save}
                             </button>
                           </div>
                         </div>

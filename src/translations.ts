@@ -106,7 +106,9 @@ export const translations: Record<Language, any> = {
     goal100Msg: 'すべての目標を達成しました！',
     targetCount: '目標回数',
     times: '回',
-    progressLabel: '進捗'
+    progressLabel: '進捗',
+    noteLabel: '詳細・メモ',
+    notePlaceholder: '詳細を入力...'
   },
   en: {
     title: 'Bucket List',
@@ -211,7 +213,9 @@ export const translations: Record<Language, any> = {
     goal100Msg: 'You achieved all goals!',
     targetCount: 'Target Count',
     times: 'times',
-    progressLabel: 'Progress'
+    progressLabel: 'Progress',
+    noteLabel: 'Note/Detail',
+    notePlaceholder: 'Enter details...'
   },
   zh: {
     title: 'Bucket List',

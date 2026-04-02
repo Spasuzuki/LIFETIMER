@@ -5,6 +5,7 @@ export interface BucketListItem {
   completedAt?: number;
   category?: 'annual' | 'life';
   memo?: string;
+  note?: string;
   targetCount?: number;
   currentCount?: number;
 }
