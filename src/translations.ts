@@ -103,7 +103,10 @@ export const translations: Record<Language, any> = {
     monthStartedMsg: '{month}が始まりました。',
     goalProgressMsg: '今年の目標の進捗は{progress}%です。',
     keepItUp: 'この調子で頑張りましょう！',
-    goal100Msg: 'すべての目標を達成しました！'
+    goal100Msg: 'すべての目標を達成しました！',
+    targetCount: '目標回数',
+    times: '回',
+    progressLabel: '進捗'
   },
   en: {
     title: 'Bucket List',
@@ -205,7 +208,10 @@ export const translations: Record<Language, any> = {
     monthStartedMsg: '{month} has started.',
     goalProgressMsg: 'Your goal progress is {progress}%.',
     keepItUp: "Let's do our best!",
-    goal100Msg: 'You achieved all goals!'
+    goal100Msg: 'You achieved all goals!',
+    targetCount: 'Target Count',
+    times: 'times',
+    progressLabel: 'Progress'
   },
   zh: {
     title: 'Bucket List',
@@ -296,7 +302,10 @@ export const translations: Record<Language, any> = {
     monthStartedMsg: '{month}开始了。',
     goalProgressMsg: '今年的目标进度为{progress}%。',
     keepItUp: '继续加油！',
-    goal100Msg: '你已完成所有目标！'
+    goal100Msg: '你已完成所有目标！',
+    targetCount: '目标次数',
+    times: '次',
+    progressLabel: '进度'
   },
   es: {
     title: 'Bucket List',
@@ -387,7 +396,10 @@ export const translations: Record<Language, any> = {
     monthStartedMsg: 'Ha comenzado {month}.',
     goalProgressMsg: 'El progreso de tus objetivos es del {progress}%.',
     keepItUp: '¡Sigamos así!',
-    goal100Msg: '¡Has alcanzado todos tus objetivos!'
+    goal100Msg: '¡Has alcanzado todos tus objetivos!',
+    targetCount: 'Número de objetivos',
+    times: 'veces',
+    progressLabel: 'Progreso'
   },
   fr: {
     title: 'Bucket List',
@@ -478,6 +490,9 @@ export const translations: Record<Language, any> = {
     monthStartedMsg: '{month} a commencé.',
     goalProgressMsg: 'La progression de vos objectifs est de {progress}%.',
     keepItUp: 'Continuons comme ça !',
-    goal100Msg: 'Vous avez atteint tous vos objectifs !'
+    goal100Msg: 'Vous avez atteint tous vos objectifs !',
+    targetCount: 'Nombre cible',
+    times: 'fois',
+    progressLabel: 'Progression'
   }
 };

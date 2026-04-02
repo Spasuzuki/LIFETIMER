@@ -5,6 +5,8 @@ export interface BucketListItem {
   completedAt?: number;
   category?: 'annual' | 'life';
   memo?: string;
+  targetCount?: number;
+  currentCount?: number;
 }
 
 export type Language = 'ja' | 'en' | 'zh' | 'es' | 'fr';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BucketListItem, Language } from '../types';
-import { X, Plus, CheckCircle2, Circle, Trash2, ListTodo, RotateCcw, StickyNote, Save, Unlock } from 'lucide-react';
+import { X, Plus, CheckCircle2, Circle, Trash2, ListTodo, RotateCcw, StickyNote, Save, Unlock, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
 
@@ -18,7 +18,9 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [activeCategory, setActiveCategory] = useState<'annual' | 'life'>('annual');
   const [editingMemoId, setEditingMemoId] = useState<string | null>(null);
+  const [editingCountId, setEditingCountId] = useState<string | null>(null);
   const [memoText, setMemoText] = useState('');
+  const [countInput, setCountInput] = useState('');
   const t = translations[language || 'ja'];
 
   const addItem = (e: React.FormEvent) => {
@@ -29,7 +31,9 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
       id: crypto.randomUUID(),
       text: newItemText.trim(),
       completed: false,
-      category: activeCategory
+      category: activeCategory,
+      currentCount: 0,
+      targetCount: 1
     };
     
     onUpdate([...items, newItem]);
@@ -39,14 +43,46 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
   const toggleItem = (id: string) => {
     onUpdate(items.map(item => {
       if (item.id === id) {
+        const target = item.targetCount || 1;
+        if (target > 1) {
+          const nextCount = (item.currentCount || 0) + 1;
+          const isCompleted = nextCount >= target;
+          return { 
+            ...item, 
+            currentCount: nextCount,
+            completed: isCompleted,
+            completedAt: isCompleted ? Date.now() : undefined
+          };
+        } else {
+          return { 
+            ...item, 
+            completed: !item.completed,
+            completedAt: !item.completed ? Date.now() : undefined,
+            currentCount: !item.completed ? 1 : 0
+          };
+        }
+      }
+      return item;
+    }));
+  };
+
+  const saveTargetCount = (id: string) => {
+    const count = parseInt(countInput);
+    if (isNaN(count) || count < 1) return;
+
+    onUpdate(items.map(item => {
+      if (item.id === id) {
+        const isCompleted = (item.currentCount || 0) >= count;
         return { 
           ...item, 
-          completed: !item.completed,
-          completedAt: !item.completed ? Date.now() : undefined
+          targetCount: count,
+          completed: isCompleted,
+          completedAt: isCompleted ? (item.completedAt || Date.now()) : undefined
         };
       }
       return item;
     }));
+    setEditingCountId(null);
   };
 
   const deleteItem = (id: string) => {
@@ -67,6 +103,11 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
   const startEditingMemo = (item: BucketListItem) => {
     setEditingMemoId(item.id);
     setMemoText(item.memo || '');
+  };
+
+  const startEditingCount = (item: BucketListItem) => {
+    setEditingCountId(item.id);
+    setCountInput(String(item.targetCount || 1));
   };
 
   const activeItems = items.filter(i => !i.completed);
@@ -181,122 +222,195 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
               {activeTab === 'active' ? t.noActiveGoals : t.noCompletedGoals}
             </div>
           ) : (
-            displayItems.map((item) => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                key={item.id}
-                className="flex flex-col gap-2"
-              >
-                <div className="group flex items-center gap-3 p-3 bg-zinc-800/50 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-all">
-                  <button 
-                    onClick={() => toggleItem(item.id)}
-                    className="shrink-0 text-zinc-500 hover:text-white transition-colors"
-                  >
-                    {item.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    ) : (
-                      <Circle className="w-5 h-5" />
-                    )}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm ${item.completed ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
-                      {item.text}
-                    </div>
-                    {item.completed && item.completedAt && (
-                      <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
-                        {new Date(item.completedAt).getFullYear()}年{String(new Date(item.completedAt).getMonth() + 1).padStart(2, '0')}月 {t.completedAt}
-                      </div>
-                    )}
-                    {!item.completed && item.memo && (
-                      <div className="text-[10px] text-zinc-500 mt-1 flex items-center gap-1">
-                        <StickyNote className="w-3 h-3" />
-                        <span className="truncate">{item.memo}</span>
-                      </div>
-                    )}
-                    {item.completed && item.memo && editingMemoId !== item.id && (
-                      <div className="text-[10px] text-zinc-400 mt-1 bg-zinc-900/50 p-1.5 rounded border border-zinc-800/50 italic">
-                        {item.memo}
-                      </div>
-                    )}
-                  </div>
-                  <div className="shrink-0 flex items-center gap-1 transition-all">
-                    {item.completed && (
-                      <>
-                        <button 
-                          onClick={() => {
-                            if (isPremium) {
-                              startEditingMemo(item);
-                            } else if (onUpgrade) {
-                              onUpgrade();
-                            }
-                          }}
-                          title={t.memo}
-                          className={`p-1 transition-colors ${editingMemoId === item.id ? 'text-white' : 'text-zinc-600 hover:text-white'} relative`}
-                        >
-                          <StickyNote className="w-4 h-4" />
-                          {!isPremium && (
-                            <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-0.5 shadow-lg">
-                              <Unlock className="w-2 h-2 text-black" />
-                            </div>
-                          )}
-                        </button>
-                        <button 
-                          onClick={() => toggleItem(item.id)}
-                          title={t.restore}
-                          className="p-1 text-zinc-600 hover:text-white transition-colors"
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                        </button>
-                      </>
-                    )}
+            displayItems.map((item) => {
+              const itemTarget = item.targetCount || 1;
+              const itemCurrent = item.currentCount || 0;
+              const itemPercent = Math.min(100, Math.round((itemCurrent / itemTarget) * 100));
+              const isMultiStep = itemTarget > 1;
+
+              return (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  key={item.id}
+                  className="flex flex-col gap-2"
+                >
+                  <div className="group flex items-center gap-3 p-3 bg-zinc-800/50 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-all">
                     <button 
-                      onClick={() => deleteItem(item.id)}
-                      title={t.delete}
-                      className="p-1 text-zinc-600 hover:text-red-500 transition-colors"
+                      onClick={() => toggleItem(item.id)}
+                      className="shrink-0 text-zinc-500 hover:text-white transition-colors"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {item.completed ? (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                      ) : (
+                        <Circle className="w-5 h-5" />
+                      )}
                     </button>
-                  </div>
-                </div>
-                
-                <AnimatePresence>
-                  {editingMemoId === item.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden px-1"
-                    >
-                      <div className="flex gap-2 p-2 bg-zinc-800 border border-zinc-700 rounded-lg">
-                        <textarea
-                          autoFocus
-                          value={memoText}
-                          onChange={(e) => setMemoText(e.target.value)}
-                          placeholder={t.memoPlaceholder}
-                          className="flex-1 bg-transparent text-xs text-zinc-200 focus:outline-none resize-none min-h-[60px]"
-                        />
-                        <div className="flex flex-col gap-2">
-                          <button
-                            onClick={() => saveMemo(item.id)}
-                            className="p-2 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors"
-                          >
-                            <Save className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditingMemoId(null)}
-                            className="p-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-sm ${item.completed ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
+                        {item.text}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))
+                      
+                      {isMultiStep && !item.completed && (
+                        <div className="mt-2 space-y-1">
+                          <div className="flex items-center justify-between text-[8px] font-mono text-zinc-500 uppercase tracking-widest">
+                            <span>{t.progressLabel}</span>
+                            <span>{itemCurrent}/{itemTarget} ({itemPercent}%)</span>
+                          </div>
+                          <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${itemPercent}%` }}
+                              className="h-full bg-emerald-500/50"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {item.completed && item.completedAt && (
+                        <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
+                          {new Date(item.completedAt).getFullYear()}年{String(new Date(item.completedAt).getMonth() + 1).padStart(2, '0')}月 {t.completedAt}
+                        </div>
+                      )}
+                      {!item.completed && item.memo && (
+                        <div className="text-[10px] text-zinc-500 mt-1 flex items-center gap-1">
+                          <StickyNote className="w-3 h-3" />
+                          <span className="truncate">{item.memo}</span>
+                        </div>
+                      )}
+                      {item.completed && item.memo && editingMemoId !== item.id && (
+                        <div className="text-[10px] text-zinc-400 mt-1 bg-zinc-900/50 p-1.5 rounded border border-zinc-800/50 italic">
+                          {item.memo}
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1 transition-all">
+                      {!item.completed && (
+                        <button 
+                          onClick={() => startEditingCount(item)}
+                          title={t.targetCount}
+                          className={`p-1 transition-colors ${editingCountId === item.id ? 'text-white' : 'text-zinc-600 hover:text-white'}`}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      )}
+                      {item.completed && (
+                        <>
+                          <button 
+                            onClick={() => {
+                              if (isPremium) {
+                                startEditingMemo(item);
+                              } else if (onUpgrade) {
+                                onUpgrade();
+                              }
+                            }}
+                            title={t.memo}
+                            className={`p-1 transition-colors ${editingMemoId === item.id ? 'text-white' : 'text-zinc-600 hover:text-white'} relative`}
+                          >
+                            <StickyNote className="w-4 h-4" />
+                            {!isPremium && (
+                              <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-0.5 shadow-lg">
+                                <Unlock className="w-2 h-2 text-black" />
+                              </div>
+                            )}
+                          </button>
+                          <button 
+                            onClick={() => {
+                              onUpdate(items.map(i => i.id === item.id ? { ...i, completed: false, currentCount: 0, completedAt: undefined } : i));
+                            }}
+                            title={t.restore}
+                            className="p-1 text-zinc-600 hover:text-white transition-colors"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                      <button 
+                        onClick={() => deleteItem(item.id)}
+                        title={t.delete}
+                        className="p-1 text-zinc-600 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <AnimatePresence>
+                    {editingCountId === item.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden px-1"
+                      >
+                        <div className="flex items-center gap-2 p-2 bg-zinc-800 border border-zinc-700 rounded-lg">
+                          <div className="flex-1 flex items-center gap-2">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.targetCount}</span>
+                            <input
+                              type="number"
+                              min="1"
+                              autoFocus
+                              value={countInput}
+                              onChange={(e) => setCountInput(e.target.value)}
+                              className="w-16 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white focus:outline-none"
+                            />
+                            <span className="text-[10px] text-zinc-500">{t.times}</span>
+                          </div>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => saveTargetCount(item.id)}
+                              className="p-1.5 bg-white text-black rounded hover:bg-zinc-200 transition-colors"
+                            >
+                              <Save className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setEditingCountId(null)}
+                              className="p-1.5 bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {editingMemoId === item.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden px-1"
+                      >
+                        <div className="flex gap-2 p-2 bg-zinc-800 border border-zinc-700 rounded-lg">
+                          <textarea
+                            autoFocus
+                            value={memoText}
+                            onChange={(e) => setMemoText(e.target.value)}
+                            placeholder={t.memoPlaceholder}
+                            className="flex-1 bg-transparent text-xs text-zinc-200 focus:outline-none resize-none min-h-[60px]"
+                          />
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => saveMemo(item.id)}
+                              className="p-2 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors"
+                            >
+                              <Save className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setEditingMemoId(null)}
+                              className="p-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })
           )}
         </div>
       </div>
