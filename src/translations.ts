@@ -114,7 +114,7 @@ export const translations: Record<Language, any> = {
     giftedTime: '与えられた時間',
     eveningAdvice: '目標へのアドバイス',
     eveningAdviceDesc: 'AIがあなたのバケットリストを分析し、\n明日へのアドバイスを届けます。',
-    eveningAdviceTitle: 'おやすみ前の振り返り',
+    eveningAdviceTitle: '目標へのアドバイス',
     eveningAdviceLoading: 'AIがアドバイスを生成中...',
     eveningAdviceTime: '通知時間'
   },
@@ -229,7 +229,7 @@ export const translations: Record<Language, any> = {
     giftedTime: 'GIFTED TIME',
     eveningAdvice: 'Evening Goal Advice',
     eveningAdviceDesc: 'AI analyzes your bucket list and provides advice for tomorrow.',
-    eveningAdviceTitle: 'Evening Reflection',
+    eveningAdviceTitle: 'Goal Advice',
     eveningAdviceLoading: 'AI generating advice...',
     eveningAdviceTime: 'Notification Time'
   },
@@ -329,9 +329,9 @@ export const translations: Record<Language, any> = {
     progressLabel: '进度',
     bonusTime: '奖励时间',
     giftedTime: '赠予的时间',
-    eveningAdvice: '睡前目标建议',
+    eveningAdvice: '目标建议',
     eveningAdviceDesc: 'AI 分析您的愿望清单并为明天提供建议。',
-    eveningAdviceTitle: '睡前反思',
+    eveningAdviceTitle: '目标建议',
     eveningAdviceLoading: 'AI 正在生成建议...',
     eveningAdviceTime: '通知时间'
   },
@@ -431,9 +431,9 @@ export const translations: Record<Language, any> = {
     progressLabel: 'Progreso',
     bonusTime: 'TIEMPO EXTRA',
     giftedTime: 'TIEMPO REGALADO',
-    eveningAdvice: 'Consejos Nocturnos',
+    eveningAdvice: 'Consejos para metas',
     eveningAdviceDesc: 'La IA analiza tu lista de deseos y te da consejos para mañana.',
-    eveningAdviceTitle: 'Reflexión Nocturna',
+    eveningAdviceTitle: 'Consejos para metas',
     eveningAdviceLoading: 'IA generando consejos...',
     eveningAdviceTime: 'Hora de notificación'
   },
@@ -533,9 +533,9 @@ export const translations: Record<Language, any> = {
     progressLabel: 'Progression',
     bonusTime: 'TEMPS BONUS',
     giftedTime: 'TEMPS CADEAU',
-    eveningAdvice: 'Conseils de Soirée',
+    eveningAdvice: 'Conseils pour vos objectifs',
     eveningAdviceDesc: 'L\'IA analyse votre liste de souhaits et donne des conseils pour demain.',
-    eveningAdviceTitle: 'Réflexion du Soir',
+    eveningAdviceTitle: 'Conseils pour vos objectifs',
     eveningAdviceLoading: 'L\'IA génère des conseils...',
     eveningAdviceTime: 'Heure de notification'
   }
