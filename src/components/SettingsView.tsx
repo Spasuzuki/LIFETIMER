@@ -429,21 +429,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                                         <Crown className={`w-3 h-3 ${isLocked ? 'text-zinc-700' : 'text-amber-500'}`} />
                                       )}
                                     </div>
-                                    {item.key === 'eveningAdvice' && (
-                                      <span className="text-[9px] text-zinc-600 leading-tight whitespace-pre-line">{t.eveningAdviceDesc}</span>
-                                    )}
                                   </div>
                                   <div className="flex items-center gap-2">
                                     {item.key === 'eveningAdvice' && formData.notifications?.eveningAdvice && !isLocked && (
-                                      <input
-                                        type="time"
-                                        value={formData.notifications.eveningAdviceTime || '21:00'}
-                                        onChange={(e) => setFormData({
-                                          ...formData,
-                                          notifications: { ...formData.notifications!, eveningAdviceTime: e.target.value }
-                                        })}
-                                        className="bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-white/20"
-                                      />
+                                      <div className="flex flex-col items-end gap-1">
+                                        <input
+                                          type="time"
+                                          value={formData.notifications.eveningAdviceTime || '21:00'}
+                                          onChange={(e) => {
+                                            const time = e.target.value;
+                                            const [hours] = time.split(':').map(Number);
+                                            const isValid = hours >= 18 || hours < 2;
+                                            
+                                            if (isValid) {
+                                              setFormData({
+                                                ...formData,
+                                                notifications: { ...formData.notifications!, eveningAdviceTime: time }
+                                              });
+                                            }
+                                          }}
+                                          className="bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-white/20"
+                                        />
+                                        <span className="text-[7px] text-zinc-500 font-medium">
+                                          {(t as any).eveningAdviceTimeRange}
+                                        </span>
+                                      </div>
                                     )}
                                     <button
                                       type="button"

@@ -255,6 +255,14 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
                       <div className={`text-sm ${item.completed ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
                         {item.text}
                       </div>
+
+                      {item.targetPeriod && (
+                        <div className="mt-1 flex">
+                          <span className="px-1.5 py-0.5 bg-zinc-700/50 text-zinc-400 text-[8px] font-bold uppercase tracking-widest rounded border border-zinc-700">
+                            {(t as any)[item.targetPeriod]}
+                          </span>
+                        </div>
+                      )}
                       
                       {item.note && (
                         <div className="text-[10px] text-zinc-500 mt-0.5 italic">
@@ -367,6 +375,60 @@ export const BucketListView: React.FC<BucketListViewProps> = ({ items, language,
                             <span className="text-[10px] text-zinc-500">{t.times}</span>
                           </div>
                           
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-widest">{(t as any).targetPeriodLabel}</span>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {activeCategory === 'annual' ? (
+                                [
+                                  { id: 'q1', label: (t as any).q1 },
+                                  { id: 'q2', label: (t as any).q2 },
+                                  { id: 'q3', label: (t as any).q3 },
+                                  { id: 'q4', label: (t as any).q4 },
+                                ].map((period) => (
+                                  <button
+                                    key={period.id}
+                                    type="button"
+                                    onClick={() => {
+                                      onUpdate(items.map(i => i.id === item.id ? { ...i, targetPeriod: period.id } : i));
+                                    }}
+                                    className={`py-1.5 rounded-lg border text-[10px] transition-all ${
+                                      item.targetPeriod === period.id 
+                                        ? 'bg-white text-black border-white font-bold' 
+                                        : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'
+                                    }`}
+                                  >
+                                    {period.label}
+                                  </button>
+                                ))
+                              ) : (
+                                [
+                                  { id: 'years5', label: (t as any).years5 },
+                                  { id: 'years10', label: (t as any).years10 },
+                                  { id: 'years15', label: (t as any).years15 },
+                                  { id: 'years20', label: (t as any).years20 },
+                                  { id: 'years25', label: (t as any).years25 },
+                                  { id: 'years30', label: (t as any).years30 },
+                                  { id: 'yearsMore', label: (t as any).yearsMore },
+                                ].map((period) => (
+                                  <button
+                                    key={period.id}
+                                    type="button"
+                                    onClick={() => {
+                                      onUpdate(items.map(i => i.id === item.id ? { ...i, targetPeriod: period.id } : i));
+                                    }}
+                                    className={`py-1.5 rounded-lg border text-[10px] transition-all ${
+                                      item.targetPeriod === period.id 
+                                        ? 'bg-white text-black border-white font-bold' 
+                                        : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'
+                                    }`}
+                                  >
+                                    {period.label}
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          </div>
+
                           <div className="flex flex-col gap-1.5">
                             <span className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.noteLabel}</span>
                             <textarea

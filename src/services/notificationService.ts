@@ -220,7 +220,7 @@ export class NotificationService {
       notifications.push({
         id: 5,
         title: t.eveningAdviceTitle,
-        body: t.eveningAdviceDesc,
+        body: t.eveningAdviceTitle,
         schedule: {
           allowWhileIdle: true,
           on: {

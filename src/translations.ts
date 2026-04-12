@@ -116,7 +116,20 @@ export const translations: Record<Language, any> = {
     eveningAdviceDesc: 'AIがあなたのバケットリストを分析し、\n明日へのアドバイスを届けます。',
     eveningAdviceTitle: '目標へのアドバイス',
     eveningAdviceLoading: 'AIがアドバイスを生成中...',
-    eveningAdviceTime: '通知時間'
+    eveningAdviceTime: '通知時間',
+    eveningAdviceTimeRange: '設定可能範囲: 18:00 - 02:00',
+    targetPeriodLabel: '達成目標時期',
+    q1: '1〜3月',
+    q2: '4〜6月',
+    q3: '7〜9月',
+    q4: '10〜12月',
+    years5: '5年以内',
+    years10: '10年以内',
+    years15: '15年以内',
+    years20: '20年以内',
+    years25: '25年以内',
+    years30: '30年以内',
+    yearsMore: 'それ以降'
   },
   en: {
     title: 'Bucket List',
@@ -231,7 +244,20 @@ export const translations: Record<Language, any> = {
     eveningAdviceDesc: 'AI analyzes your bucket list and provides advice for tomorrow.',
     eveningAdviceTitle: 'Goal Advice',
     eveningAdviceLoading: 'AI generating advice...',
-    eveningAdviceTime: 'Notification Time'
+    eveningAdviceTime: 'Notification Time',
+    eveningAdviceTimeRange: 'Available range: 18:00 - 02:00',
+    targetPeriodLabel: 'Target Period',
+    q1: 'Jan-Mar',
+    q2: 'Apr-Jun',
+    q3: 'Jul-Sep',
+    q4: 'Oct-Dec',
+    years5: 'Within 5 years',
+    years10: 'Within 10 years',
+    years15: 'Within 15 years',
+    years20: 'Within 20 years',
+    years25: 'Within 25 years',
+    years30: 'Within 30 years',
+    yearsMore: 'Beyond'
   },
   zh: {
     title: 'Bucket List',
@@ -333,7 +359,20 @@ export const translations: Record<Language, any> = {
     eveningAdviceDesc: 'AI 分析您的愿望清单并为明天提供建议。',
     eveningAdviceTitle: '目标建议',
     eveningAdviceLoading: 'AI 正在生成建议...',
-    eveningAdviceTime: '通知时间'
+    eveningAdviceTime: '通知时间',
+    eveningAdviceTimeRange: '可选范围: 18:00 - 02:00',
+    targetPeriodLabel: '目标达成时期',
+    q1: '1〜3月',
+    q2: '4〜6月',
+    q3: '7〜9月',
+    q4: '10〜12月',
+    years5: '5年内',
+    years10: '10年内',
+    years15: '15年内',
+    years20: '20年内',
+    years25: '25年内',
+    years30: '30年内',
+    yearsMore: '此后'
   },
   es: {
     title: 'Bucket List',
@@ -435,7 +474,20 @@ export const translations: Record<Language, any> = {
     eveningAdviceDesc: 'La IA analiza tu lista de deseos y te da consejos para mañana.',
     eveningAdviceTitle: 'Consejos para metas',
     eveningAdviceLoading: 'IA generando consejos...',
-    eveningAdviceTime: 'Hora de notificación'
+    eveningAdviceTime: 'Hora de notificación',
+    eveningAdviceTimeRange: 'Rango disponible: 18:00 - 02:00',
+    targetPeriodLabel: 'Periodo objetivo',
+    q1: 'Ene-Mar',
+    q2: 'Abr-Jun',
+    q3: 'Jul-Sep',
+    q4: 'Oct-Dic',
+    years5: 'En 5 años',
+    years10: 'En 10 años',
+    years15: 'En 15 años',
+    years20: 'En 20 años',
+    years25: 'En 25 años',
+    years30: 'En 30 años',
+    yearsMore: 'Más allá'
   },
   fr: {
     title: 'Bucket List',
@@ -537,6 +589,19 @@ export const translations: Record<Language, any> = {
     eveningAdviceDesc: 'L\'IA analyse votre liste de souhaits et donne des conseils pour demain.',
     eveningAdviceTitle: 'Conseils pour vos objectifs',
     eveningAdviceLoading: 'L\'IA génère des conseils...',
-    eveningAdviceTime: 'Heure de notification'
+    eveningAdviceTime: 'Heure de notification',
+    eveningAdviceTimeRange: 'Plage disponible : 18:00 - 02:00',
+    targetPeriodLabel: 'Période cible',
+    q1: 'Jan-Mar',
+    q2: 'Avr-Juin',
+    q3: 'Juil-Sep',
+    q4: 'Oct-Déc',
+    years5: 'D\'ici 5 ans',
+    years10: 'D\'ici 10 ans',
+    years15: 'D\'ici 15 ans',
+    years20: 'D\'ici 20 ans',
+    years25: 'D\'ici 25 ans',
+    years30: 'D\'ici 30 ans',
+    yearsMore: 'Au-delà'
   }
 };

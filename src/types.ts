@@ -8,6 +8,7 @@ export interface BucketListItem {
   note?: string;
   targetCount?: number;
   currentCount?: number;
+  targetPeriod?: string;
 }
 
 export type Language = 'ja' | 'en' | 'zh' | 'es' | 'fr';
