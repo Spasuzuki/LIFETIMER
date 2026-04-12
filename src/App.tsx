@@ -278,24 +278,6 @@ const App = () => {
               setIsBucketListOpen(false);
               setIsPremiumModalOpen(true);
             }}
-            remainingYears={(() => {
-              const birthDate = parseISO(userData!.birthDate);
-              const expectancyYears = userData!.lifeExpectancyOverride || 
-                (LIFE_EXPECTANCY[userData!.country] ? 
-                  (userData!.gender === 'male' ? LIFE_EXPECTANCY[userData!.country].male : LIFE_EXPECTANCY[userData!.country].female) : 
-                  80);
-              const deathDate = addYears(birthDate, expectancyYears);
-              return Math.max(0, differenceInYears(deathDate, new Date()));
-            })()}
-            isBonusTime={(() => {
-              const birthDate = parseISO(userData!.birthDate);
-              const expectancyYears = userData!.lifeExpectancyOverride || 
-                (LIFE_EXPECTANCY[userData!.country] ? 
-                  (userData!.gender === 'male' ? LIFE_EXPECTANCY[userData!.country].male : LIFE_EXPECTANCY[userData!.country].female) : 
-                  80);
-              const deathDate = addYears(birthDate, expectancyYears);
-              return new Date() > deathDate;
-            })()}
           />
         )}
         {isBiorhythmOpen && userData && (

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { BucketListItem, Language } from '../types';
-import { X, Plus, CheckCircle2, Circle, Trash2, ListTodo, RotateCcw, StickyNote, Save, Unlock, Pencil, Sparkles, Loader2 } from 'lucide-react';
+import { X, Plus, CheckCircle2, Circle, Trash2, ListTodo, RotateCcw, StickyNote, Save, Unlock, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
-import { AIService } from '../services/aiService';
 
 interface BucketListViewProps {
   items: BucketListItem[];
@@ -12,26 +11,14 @@ interface BucketListViewProps {
   onClose: () => void;
   isPremium?: boolean;
   onUpgrade?: () => void;
-  remainingYears: number;
-  isBonusTime: boolean;
 }
 
-export const BucketListView: React.FC<BucketListViewProps> = ({ 
-  items, 
-  language, 
-  onUpdate, 
-  onClose, 
-  isPremium, 
-  onUpgrade,
-  remainingYears,
-  isBonusTime
-}) => {
+export const BucketListView: React.FC<BucketListViewProps> = ({ items, language, onUpdate, onClose, isPremium, onUpgrade }) => {
   const [newItemText, setNewItemText] = useState('');
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [activeCategory, setActiveCategory] = useState<'annual' | 'life'>('annual');
   const [editingMemoId, setEditingMemoId] = useState<string | null>(null);
   const [editingCountId, setEditingCountId] = useState<string | null>(null);
-  const [isGeneratingAdvice, setIsGeneratingAdvice] = useState<string | null>(null);
   const [memoText, setMemoText] = useState('');
   const [countInput, setCountInput] = useState('');
   const [noteInput, setNoteInput] = useState('');
@@ -125,29 +112,6 @@ export const BucketListView: React.FC<BucketListViewProps> = ({
     setEditingCountId(item.id);
     setCountInput(String(item.targetCount || 1));
     setNoteInput(item.note || '');
-  };
-
-  const generateAdvice = async (item: BucketListItem) => {
-    if (!isPremium) {
-      onUpgrade?.();
-      return;
-    }
-    
-    setIsGeneratingAdvice(item.id);
-    try {
-      const advice = await AIService.generateGoalAdvice(
-        item.text,
-        remainingYears,
-        isBonusTime,
-        language
-      );
-      
-      onUpdate(items.map(i => i.id === item.id ? { ...i, aiAdvice: advice } : i));
-    } catch (error) {
-      console.error('Failed to generate goal advice:', error);
-    } finally {
-      setIsGeneratingAdvice(null);
-    }
   };
 
   const activeItems = items.filter(i => !i.completed);
@@ -330,48 +294,16 @@ export const BucketListView: React.FC<BucketListViewProps> = ({
                           {item.memo}
                         </div>
                       )}
-
-                      {!item.completed && item.aiAdvice && (
-                        <div className="mt-2 p-2.5 bg-amber-500/5 border border-amber-500/10 rounded-lg relative overflow-hidden group/advice">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Sparkles className="w-3 h-3 text-amber-500" />
-                            <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">{t.aiAdviceTitle}</span>
-                          </div>
-                          <div className="text-[10px] text-zinc-300 leading-relaxed">
-                            {item.aiAdvice}
-                          </div>
-                          <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 blur-2xl -mr-8 -mt-8" />
-                        </div>
-                      )}
                     </div>
                     <div className="shrink-0 flex items-center gap-1 transition-all">
                       {!item.completed && (
-                        <>
-                          <button 
-                            onClick={() => generateAdvice(item)}
-                            disabled={isGeneratingAdvice === item.id}
-                            title={t.getAiAdvice}
-                            className={`p-1 transition-colors relative ${isGeneratingAdvice === item.id ? 'text-amber-500' : 'text-zinc-600 hover:text-amber-500'}`}
-                          >
-                            {isGeneratingAdvice === item.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Sparkles className="w-4 h-4" />
-                            )}
-                            {!isPremium && (
-                              <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-0.5 shadow-lg">
-                                <Unlock className="w-2 h-2 text-black" />
-                              </div>
-                            )}
-                          </button>
-                          <button 
-                            onClick={() => startEditingCount(item)}
-                            title={t.targetCount}
-                            className={`p-1 transition-colors ${editingCountId === item.id ? 'text-white' : 'text-zinc-600 hover:text-white'}`}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                        </>
+                        <button 
+                          onClick={() => startEditingCount(item)}
+                          title={t.targetCount}
+                          className={`p-1 transition-colors ${editingCountId === item.id ? 'text-white' : 'text-zinc-600 hover:text-white'}`}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
                       )}
                       {item.completed && (
                         <>

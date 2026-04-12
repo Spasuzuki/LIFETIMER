@@ -430,7 +430,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ userData, onSave, on
                                       )}
                                     </div>
                                     {item.key === 'eveningAdvice' && (
-                                      <span className="text-[9px] text-zinc-600 leading-tight">{t.eveningAdviceDesc}</span>
+                                      <span className="text-[9px] text-zinc-600 leading-tight whitespace-pre-line">{t.eveningAdviceDesc}</span>
                                     )}
                                   </div>
                                   <div className="flex items-center gap-2">
