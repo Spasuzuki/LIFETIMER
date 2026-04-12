@@ -214,6 +214,23 @@ export class NotificationService {
       });
     }
 
+    // 5. Evening Advice Notification (ID: 5)
+    if (settings.eveningAdvice && userData.isPremium) {
+      const [eHours, eMinutes] = (settings.eveningAdviceTime || '21:00').split(':').map(Number);
+      notifications.push({
+        id: 5,
+        title: t.eveningAdviceTitle,
+        body: t.eveningAdviceDesc,
+        schedule: {
+          allowWhileIdle: true,
+          on: {
+            hour: eHours,
+            minute: eMinutes
+          }
+        }
+      });
+    }
+
     if (notifications.length > 0) {
       await LocalNotifications.schedule({ notifications });
     }

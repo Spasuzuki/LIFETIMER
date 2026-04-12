@@ -108,7 +108,18 @@ export const translations: Record<Language, any> = {
     times: '回',
     progressLabel: '進捗',
     noteLabel: '詳細・メモ',
-    notePlaceholder: '詳細を入力...'
+    notePlaceholder: '詳細を入力...',
+    bonusTime: 'ギフトタイム',
+    giftedTime: '与えられた時間',
+    eveningAdvice: '目標へのアドバイス',
+    eveningAdviceDesc: 'AIがあなたのバケットリストを分析し、明日へのアドバイスを届けます。',
+    eveningAdviceTitle: 'おやすみ前の振り返り',
+    eveningAdviceLoading: 'AIがアドバイスを生成中...',
+    eveningAdviceTime: '通知時間',
+    premiumFeature4: 'AIによる目標達成アドバイス（毎日）',
+    getAiAdvice: 'AIアドバイスを取得',
+    aiAdviceTitle: '達成へのアドバイス',
+    aiAdvicePrompt: 'この目標をいつ、どのように達成すべきかAIに相談します。'
   },
   en: {
     title: 'Bucket List',
@@ -215,7 +226,18 @@ export const translations: Record<Language, any> = {
     times: 'times',
     progressLabel: 'Progress',
     noteLabel: 'Note/Detail',
-    notePlaceholder: 'Enter details...'
+    notePlaceholder: 'Enter details...',
+    bonusTime: 'BONUS TIME',
+    giftedTime: 'GIFTED TIME',
+    eveningAdvice: 'Evening Goal Advice',
+    eveningAdviceDesc: 'AI analyzes your bucket list and provides advice for tomorrow.',
+    eveningAdviceTitle: 'Evening Reflection',
+    eveningAdviceLoading: 'AI generating advice...',
+    eveningAdviceTime: 'Notification Time',
+    premiumFeature4: 'AI Goal Achievement Advice (Daily)',
+    getAiAdvice: 'Get AI Advice',
+    aiAdviceTitle: 'Achievement Advice',
+    aiAdvicePrompt: 'Consult AI on when and how to achieve this goal.'
   },
   zh: {
     title: 'Bucket List',
@@ -309,7 +331,18 @@ export const translations: Record<Language, any> = {
     goal100Msg: '你已完成所有目标！',
     targetCount: '目标次数',
     times: '次',
-    progressLabel: '进度'
+    progressLabel: '进度',
+    bonusTime: '奖励时间',
+    giftedTime: '赠予的时间',
+    eveningAdvice: '睡前目标建议',
+    eveningAdviceDesc: 'AI 分析您的愿望清单并为明天提供建议。',
+    eveningAdviceTitle: '睡前反思',
+    eveningAdviceLoading: 'AI 正在生成建议...',
+    eveningAdviceTime: '通知时间',
+    premiumFeature4: 'AI 目标达成建议（每日）',
+    getAiAdvice: '获取 AI 建议',
+    aiAdviceTitle: '达成建议',
+    aiAdvicePrompt: '咨询 AI 如何以及何时达成此目标。'
   },
   es: {
     title: 'Bucket List',
@@ -403,7 +436,18 @@ export const translations: Record<Language, any> = {
     goal100Msg: '¡Has alcanzado todos tus objetivos!',
     targetCount: 'Número de objetivos',
     times: 'veces',
-    progressLabel: 'Progreso'
+    progressLabel: 'Progreso',
+    bonusTime: 'TIEMPO EXTRA',
+    giftedTime: 'TIEMPO REGALADO',
+    eveningAdvice: 'Consejos Nocturnos',
+    eveningAdviceDesc: 'La IA analiza tu lista de deseos y te da consejos para mañana.',
+    eveningAdviceTitle: 'Reflexión Nocturna',
+    eveningAdviceLoading: 'IA generando consejos...',
+    eveningAdviceTime: 'Hora de notificación',
+    premiumFeature4: 'Consejos de IA para metas (Diario)',
+    getAiAdvice: 'Obtener consejo de IA',
+    aiAdviceTitle: 'Consejo de logro',
+    aiAdvicePrompt: 'Consultar a la IA sobre cuándo y cómo lograr este objetivo.'
   },
   fr: {
     title: 'Bucket List',
@@ -475,6 +519,7 @@ export const translations: Record<Language, any> = {
     premiumFeature1: 'Débloquer des catégories de citations spécialisées',
     premiumFeature2: 'Analyse quotidienne du biorythme',
     premiumFeature3: 'Débloquer la fonction de notes de la liste de souhaits',
+    premiumFeature4: 'Conseils IA pour vos objectifs (Quotidien)',
     purchase: 'Acheter',
     restorePurchase: 'Restaurer l\'achat',
     dailyQuote: 'Citation Quotidienne (Quotidien)',
@@ -497,6 +542,16 @@ export const translations: Record<Language, any> = {
     goal100Msg: 'Vous avez atteint tous vos objectifs !',
     targetCount: 'Nombre cible',
     times: 'fois',
-    progressLabel: 'Progression'
+    progressLabel: 'Progression',
+    bonusTime: 'TEMPS BONUS',
+    giftedTime: 'TEMPS CADEAU',
+    eveningAdvice: 'Conseils de Soirée',
+    eveningAdviceDesc: 'L\'IA analyse votre liste de souhaits et donne des conseils pour demain.',
+    eveningAdviceTitle: 'Réflexion du Soir',
+    eveningAdviceLoading: 'L\'IA génère des conseils...',
+    eveningAdviceTime: 'Heure de notification',
+    getAiAdvice: 'Obtenir des conseils IA',
+    aiAdviceTitle: 'Conseils de réussite',
+    aiAdvicePrompt: 'Consultez l\'IA sur quand et comment atteindre cet objectif.'
   }
 };

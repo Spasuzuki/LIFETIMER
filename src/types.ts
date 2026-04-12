@@ -8,6 +8,7 @@ export interface BucketListItem {
   note?: string;
   targetCount?: number;
   currentCount?: number;
+  aiAdvice?: string;
 }
 
 export type Language = 'ja' | 'en' | 'zh' | 'es' | 'fr';
@@ -22,6 +23,8 @@ export interface NotificationSettings {
   weeklyLife: boolean;
   monthlyUpdate: boolean;
   birthdayMessage: boolean;
+  eveningAdvice?: boolean;
+  eveningAdviceTime?: string; // HH:mm
 }
 
 export interface UserData {

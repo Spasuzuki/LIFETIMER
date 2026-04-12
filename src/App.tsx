@@ -21,6 +21,7 @@ import { differenceInYears, parseISO, isSameDay, addYears, addMonths, difference
 import { COUNTRIES, LIFE_EXPECTANCY } from './constants';
 import { BiorhythmView } from './components/BiorhythmView';
 import { PremiumModal } from './components/PremiumModal';
+import { EveningAdviceModal } from './components/EveningAdviceModal';
 
 const STORAGE_KEY = 'bucket-list-user-data';
 
@@ -49,6 +50,7 @@ const App = () => {
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isBirthdayOpen, setIsBirthdayOpen] = useState(false);
+  const [isEveningAdviceOpen, setIsEveningAdviceOpen] = useState(false);
   const [seconds, setSeconds] = useState(new Date().getSeconds());
 
   const checkBirthday = (data: UserData) => {
@@ -73,6 +75,9 @@ const App = () => {
       if (action.notification.id === 3) {
         setIsBirthdayOpen(true);
       }
+      if (action.notification.id === 5) {
+        setIsEveningAdviceOpen(true);
+      }
     };
 
     LocalNotifications.addListener('localNotificationActionPerformed', handleNotificationAction);
@@ -95,6 +100,25 @@ const App = () => {
           const updatedData = { ...data, isPremium };
           setUserData(updatedData);
           checkBirthday(updatedData);
+          
+          // Check for evening advice trigger
+          if (updatedData.notifications?.eveningAdvice && updatedData.isPremium) {
+            const now = new Date();
+            const [eHours, eMinutes] = (updatedData.notifications.eveningAdviceTime || '21:00').split(':').map(Number);
+            const adviceTime = new Date();
+            adviceTime.setHours(eHours, eMinutes, 0, 0);
+            
+            // If it's after advice time and we haven't shown it today
+            if (now >= adviceTime) {
+              const lastAdviceShown = localStorage.getItem('last-evening-advice-shown');
+              const todayStr = now.toISOString().split('T')[0];
+              if (lastAdviceShown !== todayStr) {
+                setIsEveningAdviceOpen(true);
+                localStorage.setItem('last-evening-advice-shown', todayStr);
+              }
+            }
+          }
+
           NotificationService.scheduleNotifications(updatedData);
         } catch (e) {
           setUserData({ ...DEFAULT_USER_DATA, isPremium });
@@ -254,6 +278,24 @@ const App = () => {
               setIsBucketListOpen(false);
               setIsPremiumModalOpen(true);
             }}
+            remainingYears={(() => {
+              const birthDate = parseISO(userData!.birthDate);
+              const expectancyYears = userData!.lifeExpectancyOverride || 
+                (LIFE_EXPECTANCY[userData!.country] ? 
+                  (userData!.gender === 'male' ? LIFE_EXPECTANCY[userData!.country].male : LIFE_EXPECTANCY[userData!.country].female) : 
+                  80);
+              const deathDate = addYears(birthDate, expectancyYears);
+              return Math.max(0, differenceInYears(deathDate, new Date()));
+            })()}
+            isBonusTime={(() => {
+              const birthDate = parseISO(userData!.birthDate);
+              const expectancyYears = userData!.lifeExpectancyOverride || 
+                (LIFE_EXPECTANCY[userData!.country] ? 
+                  (userData!.gender === 'male' ? LIFE_EXPECTANCY[userData!.country].male : LIFE_EXPECTANCY[userData!.country].female) : 
+                  80);
+              const deathDate = addYears(birthDate, expectancyYears);
+              return new Date() > deathDate;
+            })()}
           />
         )}
         {isBiorhythmOpen && userData && (
@@ -295,6 +337,14 @@ const App = () => {
               return { years, months, weeks: days };
             })()}
             onClose={() => setIsBirthdayOpen(false)}
+          />
+        )}
+        {isEveningAdviceOpen && userData && (
+          <EveningAdviceModal
+            key="evening-advice-modal"
+            items={userData.bucketList || []}
+            language={userData.language}
+            onClose={() => setIsEveningAdviceOpen(false)}
           />
         )}
       </AnimatePresence>

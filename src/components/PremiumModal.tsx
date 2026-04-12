@@ -99,6 +99,7 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({ language, onClose, o
               { icon: <Sparkles className="w-5 h-5 text-amber-500" />, text: t.premiumFeature1 },
               { icon: <Activity className="w-5 h-5 text-amber-500" />, text: t.premiumFeature2 },
               { icon: <StickyNote className="w-5 h-5 text-amber-500" />, text: t.premiumFeature3 },
+              { icon: <Zap className="w-5 h-5 text-amber-500" />, text: t.premiumFeature4 },
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-4 text-left bg-zinc-800/50 p-3 rounded-2xl border border-zinc-700/50">
                 <div className="flex-shrink-0">
